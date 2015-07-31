@@ -220,7 +220,10 @@ if __name__ == '__main__':
   args = list(set(args))
   delist = []
   ip_media_codecs = False # Default: no third-party codecs be build in.
+  enable_web_audio = True
   for arg in args:
+    if arg == '-Ddisable_web_audio=1':
+      enable_web_audio = False
     if arg.startswith('-Dproprietary_codecs') or arg.startswith('-Dffmpeg_branding'):
       continue
     elif arg == '-Dmediacodecs_EULA=1':
@@ -339,8 +342,10 @@ if __name__ == '__main__':
   args.extend(['-D', 'gyp_output_dir=' + GetOutputDirectory()])
 
   # Enable Web Audio by default on Android x86
-  if gyp_vars_dict.get('OS') == 'android':
+  if gyp_vars_dict.get('OS') == 'android' and enable_web_audio:
     args.append('-Duse_openmax_dl_fft=1')
+  else:
+    args.append('-Duse_openmax_dl_fft=0')
 
   # Enable Aura by default on all platforms except Android and Mac.
   if gyp_vars_dict.get('OS') != 'android' and sys.platform not in ('darwin',):
