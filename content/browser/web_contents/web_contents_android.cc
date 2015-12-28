@@ -17,7 +17,9 @@
 #include "content/browser/android/content_view_core_impl.h"
 #include "content/browser/android/interstitial_page_delegate_android.h"
 #include "content/browser/frame_host/interstitial_page_impl.h"
+#ifndef DISABLE_MEDIA
 #include "content/browser/media/android/browser_media_player_manager.h"
+#endif
 #include "content/browser/media/media_web_contents_observer.h"
 #include "content/browser/renderer_host/render_view_host_impl.h"
 #include "content/browser/web_contents/web_contents_impl.h"
@@ -128,6 +130,7 @@ void AXTreeSnapshotCallback(const ScopedJavaGlobalRef<jobject>& callback,
 }
 #endif
 
+#ifndef DISABLE_MEDIA
 void ReleaseAllMediaPlayers(WebContents* web_contents,
                             RenderFrameHost* render_frame_host) {
   BrowserMediaPlayerManager* manager =
@@ -137,6 +140,7 @@ void ReleaseAllMediaPlayers(WebContents* web_contents,
   if (manager)
     manager->ReleaseAllMediaPlayers();
 }
+#endif
 
 }  // namespace
 
@@ -328,10 +332,12 @@ void WebContentsAndroid::OnShow(JNIEnv* env, jobject obj) {
 }
 
 void WebContentsAndroid::ReleaseMediaPlayers(JNIEnv* env, jobject jobj) {
+#ifndef DISABLE_MEDIA
 #if defined(ENABLE_BROWSER_CDMS)
   web_contents_->ForEachFrame(
       base::Bind(&ReleaseAllMediaPlayers, base::Unretained(web_contents_)));
 #endif // defined(ENABLE_BROWSER_CDMS)
+#endif
 }
 
 void WebContentsAndroid::ShowInterstitialPage(
@@ -542,15 +548,21 @@ void WebContentsAndroid::RequestAccessibilitySnapshot(JNIEnv* env,
 }
 
 void WebContentsAndroid::ResumeMediaSession(JNIEnv* env, jobject obj) {
+#ifndef DISABLE_MEDIA
   web_contents_->ResumeMediaSession();
+#endif
 }
 
 void WebContentsAndroid::SuspendMediaSession(JNIEnv* env, jobject obj) {
+#ifndef DISABLE_MEDIA
   web_contents_->SuspendMediaSession();
+#endif
 }
 
 void WebContentsAndroid::StopMediaSession(JNIEnv* env, jobject obj) {
+#ifndef DISABLE_MEDIA
   web_contents_->StopMediaSession();
+#endif
 }
 
 ScopedJavaLocalRef<jstring>  WebContentsAndroid::GetEncoding(

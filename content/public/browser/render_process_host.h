@@ -28,7 +28,9 @@ union ValueState;
 }
 
 namespace media {
+#ifndef DISABLE_MEDIA
 class AudioOutputController;
+#endif
 class BrowserCdm;
 }
 
@@ -264,12 +266,14 @@ class CONTENT_EXPORT RenderProcessHost : public IPC::Sender,
   // Retrieves the list of AudioOutputController objects associated
   // with this object and passes it to the callback you specify, on
   // the same thread on which you called the method.
+#ifndef DISABLE_MEDIA
   typedef std::list<scoped_refptr<media::AudioOutputController>>
       AudioOutputControllerList;
   typedef base::Callback<void(const AudioOutputControllerList&)>
       GetAudioOutputControllersCallback;
   virtual void GetAudioOutputControllers(
       const GetAudioOutputControllersCallback& callback) const = 0;
+#endif
 
 #if defined(ENABLE_BROWSER_CDMS)
   // Returns the ::media::BrowserCdm instance associated with |render_frame_id|

@@ -14,10 +14,12 @@
 #include "ipc/ipc_message_macros.h"
 
 #if defined(OS_ANDROID)
+#ifndef DISABLE_MEDIA
 #include "content/browser/android/media_players_observer.h"
 #include "content/browser/media/android/browser_media_player_manager.h"
 #include "content/common/media/media_player_messages_android.h"
 #include "media/base/android/media_player_android.h"
+#endif
 #endif  // defined(OS_ANDROID)
 
 namespace content {

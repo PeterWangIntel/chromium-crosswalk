@@ -86,6 +86,7 @@
 #include "content/renderer/ime_event_guard.h"
 #include "content/renderer/internal_document_state_data.h"
 #include "content/renderer/manifest/manifest_manager.h"
+#ifndef DISABLE_MEDIA
 #include "content/renderer/media/audio_renderer_mixer_manager.h"
 #include "content/renderer/media/crypto/render_cdm_factory.h"
 #include "content/renderer/media/media_permission_dispatcher.h"
@@ -95,6 +96,7 @@
 #include "content/renderer/media/render_media_log.h"
 #include "content/renderer/media/user_media_client_impl.h"
 #include "content/renderer/media/webmediaplayer_ms.h"
+#endif
 #include "content/renderer/memory_benchmarking_extension.h"
 #include "content/renderer/mojo/service_registry_js_wrapper.h"
 #include "content/renderer/navigation_state_impl.h"
@@ -119,11 +121,13 @@
 #include "content/renderer/web_ui_extension.h"
 #include "content/renderer/websharedworker_proxy.h"
 #include "gin/modules/module_registry.h"
+#ifndef DISABLE_MEDIA
 #include "media/base/audio_renderer_mixer_input.h"
 #include "media/base/media_log.h"
 #include "media/blink/webencryptedmediaclient_impl.h"
 #include "media/blink/webmediaplayer_impl.h"
 #include "media/renderers/gpu_video_accelerator_factories.h"
+#endif
 #include "mojo/common/url_type_converters.h"
 #include "net/base/data_url.h"
 #include "net/base/net_errors.h"
@@ -180,9 +184,11 @@
 #include "content/common/gpu/client/context_provider_command_buffer.h"
 #include "content/renderer/android/synchronous_compositor_factory.h"
 #include "content/renderer/java/gin_java_bridge_dispatcher.h"
+#ifndef DISABLE_MEDIA
 #include "content/renderer/media/android/renderer_media_player_manager.h"
 #include "content/renderer/media/android/stream_texture_factory_impl.h"
 #include "content/renderer/media/android/webmediaplayer_android.h"
+#endif  // ifndef DISABLE_MEDIA
 #else
 #include "cc/blink/context_provider_web_context.h"
 #include "content/renderer/usb/web_usb_client_impl.h"
@@ -679,19 +685,23 @@ RenderFrameImpl::RenderFrameImpl(const CreateParams& params)
 #ifndef DISABLE_NOTIFICATIONS
       notification_permission_dispatcher_(NULL),
 #endif
+#ifndef DISABLE_MEDIA
       web_user_media_client_(NULL),
       media_permission_dispatcher_(NULL),
       midi_dispatcher_(NULL),
 #if defined(OS_ANDROID)
       media_player_manager_(NULL),
 #endif
+#endif  // ifndef DISABLE_MEDIA
 #if defined(ENABLE_BROWSER_CDMS)
       cdm_manager_(NULL),
 #endif
+#ifndef DISABLE_MEDIA
 #if defined(VIDEO_HOLE)
       contains_media_player_(false),
 #endif
       has_played_media_(false),
+#endif  // ifndef DISABLE_MEDIA
       devtools_agent_(nullptr),
 #ifndef DISABLE_GEO_FEATURES
       geolocation_dispatcher_(NULL),
@@ -734,10 +744,12 @@ RenderFrameImpl::~RenderFrameImpl() {
 
   base::trace_event::TraceLog::GetInstance()->RemoveProcessLabel(routing_id_);
 
+#ifndef DISABLE_MEDIA
 #if defined(VIDEO_HOLE)
   if (contains_media_player_)
     render_view_->UnregisterVideoHoleFrame(this);
 #endif
+#endif  // ifndef DISABLE_MEDIA
 
   if (!is_subframe_) {
     // When using swapped out frames, RenderFrameProxy is owned by
@@ -984,12 +996,14 @@ void RenderFrameImpl::OnImeConfirmComposition(
 }
 #endif  // defined(ENABLE_PLUGINS)
 
+#ifndef DISABLE_MEDIA
 MediaStreamDispatcher* RenderFrameImpl::GetMediaStreamDispatcher() {
   if (!web_user_media_client_)
     InitializeUserMediaClient();
   return web_user_media_client_ ?
       web_user_media_client_->media_stream_dispatcher() : NULL;
 }
+#endif
 
 bool RenderFrameImpl::Send(IPC::Message* message) {
   if (is_detaching_) {
@@ -2035,6 +2049,7 @@ blink::WebPlugin* RenderFrameImpl::createPlugin(
 #endif  // defined(ENABLE_PLUGINS)
 }
 
+#ifndef DISABLE_MEDIA
 blink::WebMediaPlayer* RenderFrameImpl::createMediaPlayer(
     blink::WebLocalFrame* frame,
     const blink::WebURL& url,
@@ -2098,6 +2113,7 @@ blink::WebMediaPlayer* RenderFrameImpl::createMediaPlayer(
       media_renderer_factory.Pass(), GetCdmFactory(), params);
 #endif  // defined(OS_ANDROID) && !defined(ENABLE_MEDIA_PIPELINE_ON_ANDROID)
 }
+#endif  // ifndef DISABLE_MEDIA
 
 blink::WebApplicationCacheHost* RenderFrameImpl::createApplicationCacheHost(
     blink::WebLocalFrame* frame,
@@ -3613,6 +3629,7 @@ void RenderFrameImpl::willStartUsingPeerConnectionHandler(
 #endif
 }
 
+#ifndef DISABLE_MEDIA
 blink::WebUserMediaClient* RenderFrameImpl::userMediaClient() {
   if (!web_user_media_client_)
     InitializeUserMediaClient();
@@ -3637,6 +3654,7 @@ blink::WebMIDIClient* RenderFrameImpl::webMIDIClient() {
     midi_dispatcher_ = new MidiDispatcher(this);
   return midi_dispatcher_;
 }
+#endif  // ifndef DISABLE_MEDIA
 
 bool RenderFrameImpl::willCheckAndDispatchMessageEvent(
     blink::WebLocalFrame* source_frame,
@@ -3875,6 +3893,7 @@ blink::WebVRClient* RenderFrameImpl::webVRClient() {
 }
 #endif
 
+#ifndef DISABLE_MEDIA
 void RenderFrameImpl::DidPlay(WebMediaPlayer* player) {
   has_played_media_ = true;
 #ifndef DISABLE_NOTIFICATIONS
@@ -3894,6 +3913,7 @@ void RenderFrameImpl::DidPause(WebMediaPlayer* player) {
 void RenderFrameImpl::PlayerGone(WebMediaPlayer* player) {
   DidPause(player);
 }
+#endif  // ifndef DISABLE_MEDIA
 
 void RenderFrameImpl::AddObserver(RenderFrameObserver* observer) {
   observers_.AddObserver(observer);
@@ -4749,6 +4769,7 @@ void RenderFrameImpl::SyncSelectionIfRequired() {
   GetRenderWidget()->UpdateSelectionBounds();
 }
 
+#ifndef DISABLE_MEDIA
 void RenderFrameImpl::InitializeUserMediaClient() {
   if (!RenderThreadImpl::current())  // Will be NULL during unit tests.
     return;
@@ -4798,6 +4819,7 @@ RenderFrameImpl::CreateRendererFactory() {
       static_cast<MediaStreamRendererFactory*>(NULL));
 #endif
 }
+#endif  // ifndef DISABLE_MEDIA
 
 void RenderFrameImpl::PrepareRenderViewForNavigation(
     const GURL& url,
@@ -5019,6 +5041,8 @@ NavigationState* RenderFrameImpl::CreateNavigationStateFromPending() {
   return NavigationStateImpl::CreateContentInitiated();
 }
 
+#ifndef DISABLE_MEDIA
+
 #if defined(OS_ANDROID)
 WebMediaPlayer* RenderFrameImpl::CreateAndroidWebMediaPlayer(
     WebMediaPlayerClient* client,
@@ -5125,6 +5149,8 @@ media::CdmFactory* RenderFrameImpl::GetCdmFactory() {
 
   return cdm_factory_.get();
 }
+
+#endif  // ifndef DISABLE_MEDIA
 
 void RenderFrameImpl::RegisterMojoServices() {
   // Only main frame have ImageDownloader service.

@@ -1344,6 +1344,7 @@ void RenderWidgetHostViewAndroid::OnFrameMetadataUpdated(
       frame_metadata.location_bar_offset,
       frame_metadata.location_bar_content_translation,
       is_mobile_optimized);
+#ifndef DISABLE_MEDIA
 #if defined(VIDEO_HOLE)
   if (host_ && host_->IsRenderView()) {
     RenderViewHostImpl* rvhi = static_cast<RenderViewHostImpl*>(
@@ -1354,6 +1355,7 @@ void RenderWidgetHostViewAndroid::OnFrameMetadataUpdated(
       web_contents_impl->media_web_contents_observer()->OnFrameInfoUpdated();
   }
 #endif  // defined(VIDEO_HOLE)
+#endif  // ifndef DISABLE_MEDIA
 }
 
 void RenderWidgetHostViewAndroid::AcceleratedSurfaceInitialized(int route_id) {

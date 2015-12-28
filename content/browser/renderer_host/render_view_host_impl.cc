@@ -35,7 +35,9 @@
 #include "content/browser/host_zoom_map_impl.h"
 #include "content/browser/loader/resource_dispatcher_host_impl.h"
 #include "content/browser/renderer_host/dip_util.h"
+#ifndef DISABLE_MEDIA
 #include "content/browser/renderer_host/media/audio_renderer_host.h"
+#endif
 #include "content/browser/renderer_host/render_process_host_impl.h"
 #include "content/browser/renderer_host/render_view_host_delegate.h"
 #include "content/browser/renderer_host/render_view_host_delegate_view.h"
@@ -101,7 +103,9 @@ using blink::WebDragOperation;
 using blink::WebDragOperationNone;
 using blink::WebDragOperationsMask;
 using blink::WebInputEvent;
+#ifndef DISABLE_MEDIA
 using blink::WebMediaPlayerAction;
+#endif
 using blink::WebPluginAction;
 
 namespace content {
@@ -233,6 +237,7 @@ RenderViewHostImpl::RenderViewHostImpl(
   GetProcess()->AddObserver(this);
   GetProcess()->EnableSendQueue();
 
+#ifndef DISABLE_MEDIA
   if (ResourceDispatcherHostImpl::Get()) {
     bool has_active_audio = false;
     if (has_initialized_audio_host) {
@@ -253,6 +258,7 @@ RenderViewHostImpl::RenderViewHostImpl(
                    !is_hidden(),
                    has_active_audio));
   }
+#endif
 }
 
 RenderViewHostImpl::~RenderViewHostImpl() {
@@ -438,6 +444,7 @@ WebPreferences RenderViewHostImpl::ComputeWebkitPrefs() {
   prefs.invert_viewport_scroll_order =
       command_line.HasSwitch(switches::kInvertViewportScrollOrder);
 
+#ifndef DISABLE_MEDIA
 #if defined(OS_ANDROID)
   // On Android, user gestures are normally required, unless that requirement
   // is disabled with a command-line switch or the equivalent field trial is
@@ -447,6 +454,7 @@ WebPreferences RenderViewHostImpl::ComputeWebkitPrefs() {
   prefs.user_gesture_required_for_media_playback = !command_line.HasSwitch(
       switches::kDisableGestureRequirementForMediaPlayback) &&
           (autoplay_group_name.empty() || autoplay_group_name != "Enabled");
+#endif
 #endif
 
   prefs.touch_enabled = ui::AreTouchEventsEnabled();
@@ -1349,10 +1357,12 @@ void RenderViewHostImpl::SaveImageAt(int x, int y) {
   Send(new ViewMsg_SaveImageAt(GetRoutingID(), x, y));
 }
 
+#ifndef DISABLE_MEDIA
 void RenderViewHostImpl::ExecuteMediaPlayerActionAtLocation(
   const gfx::Point& location, const blink::WebMediaPlayerAction& action) {
   Send(new ViewMsg_MediaPlayerActionAt(GetRoutingID(), location, action));
 }
+#endif
 
 void RenderViewHostImpl::ExecutePluginActionAtLocation(
   const gfx::Point& location, const blink::WebPluginAction& action) {

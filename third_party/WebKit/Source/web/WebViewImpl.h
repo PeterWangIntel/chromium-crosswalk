@@ -57,7 +57,9 @@
 #include "web/ContextMenuClientImpl.h"
 #include "web/DragClientImpl.h"
 #include "web/EditorClientImpl.h"
+#ifndef DISABLE_MEDIA
 #include "web/MediaKeysClientImpl.h"
+#endif
 #include "web/PageWidgetDelegate.h"
 #include "web/SpellCheckerClientImpl.h"
 #include "web/StorageClientImpl.h"
@@ -742,7 +744,9 @@ private:
 
     WebCompositedDisplayList m_compositedDisplayList;
 
+#ifndef DISABLE_MEDIA
     MediaKeysClientImpl m_mediaKeysClientImpl;
+#endif
     OwnPtr<WebActiveGestureAnimation> m_gestureAnimation;
     WebPoint m_positionOnFlingStart;
     WebPoint m_globalPositionOnFlingStart;

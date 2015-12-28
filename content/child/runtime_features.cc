@@ -33,6 +33,7 @@ static void SetRuntimeFeatureDefaultsForPlatform() {
   WebRuntimeFeatures::enableTouchIconLoading(true);
 
 #if defined(OS_ANDROID)
+#ifndef DISABLE_MEDIA
   // MSE/EME implementation needs Android MediaCodec API.
   if (!media::MediaCodecBridge::IsAvailable()) {
     WebRuntimeFeatures::enableMediaSource(false);
@@ -48,6 +49,12 @@ static void SetRuntimeFeatureDefaultsForPlatform() {
        (cpu_family == ANDROID_CPU_FAMILY_ARM64) ||
        (cpu_family == ANDROID_CPU_FAMILY_X86) ||
        (cpu_family == ANDROID_CPU_FAMILY_MIPS)));
+#else
+    WebRuntimeFeatures::enableMediaSource(false);
+    WebRuntimeFeatures::enablePrefixedEncryptedMedia(false);
+    WebRuntimeFeatures::enableEncryptedMedia(false);
+    WebRuntimeFeatures::enableWebAudio(false);
+#endif //  #ifndef DISABLE_MEDIA
 
   // Android does not have support for PagePopup
   WebRuntimeFeatures::enablePagePopup(false);
@@ -57,8 +64,13 @@ static void SetRuntimeFeatureDefaultsForPlatform() {
   WebRuntimeFeatures::enableNavigatorContentUtils(false);
   WebRuntimeFeatures::enableOrientationEvent(true);
   WebRuntimeFeatures::enableFastMobileScrolling(true);
+#ifdef DISABLE_MEDIA
   WebRuntimeFeatures::enableMediaCapture(true);
   WebRuntimeFeatures::enableNewMediaPlaybackUi(true);
+#else
+  WebRuntimeFeatures::enableMediaCapture(false);
+  WebRuntimeFeatures::enableNewMediaPlaybackUi(false);
+#endif
 #else
   WebRuntimeFeatures::enableNavigatorContentUtils(true);
 #endif  // defined(OS_ANDROID)
@@ -108,6 +120,7 @@ void SetRuntimeFeaturesDefaultsAndUpdateFromArgs(
   if (command_line.HasSwitch(switches::kDisableSharedWorkers))
     WebRuntimeFeatures::enableSharedWorker(false);
 
+#ifndef DISABLE_MEDIA
 #if defined(OS_ANDROID)
   // WebAudio is enabled by default on ARM and X86, if the MediaCodec
   // API is available.
@@ -118,15 +131,23 @@ void SetRuntimeFeaturesDefaultsAndUpdateFromArgs(
   if (command_line.HasSwitch(switches::kDisableWebAudio))
     WebRuntimeFeatures::enableWebAudio(false);
 #endif
+#else
+  WebRuntimeFeatures::enableWebAudio(false);
+#endif //  #ifndef DISABLE_MEDIA
 
   if (command_line.HasSwitch(switches::kDisableSpeechAPI))
     WebRuntimeFeatures::enableScriptedSpeech(false);
 
+#ifndef DISABLE_MEDIA
   if (command_line.HasSwitch(switches::kDisableEncryptedMedia))
     WebRuntimeFeatures::enableEncryptedMedia(false);
 
   if (command_line.HasSwitch(switches::kDisablePrefixedEncryptedMedia))
     WebRuntimeFeatures::enablePrefixedEncryptedMedia(false);
+#else
+    WebRuntimeFeatures::enableEncryptedMedia(false);
+    WebRuntimeFeatures::enablePrefixedEncryptedMedia(false);
+#endif //  #ifndef DISABLE_MEDIA
 
   if (command_line.HasSwitch(switches::kDisableFileSystem))
     WebRuntimeFeatures::enableFileSystem(false);

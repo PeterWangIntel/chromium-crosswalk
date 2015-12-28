@@ -49,7 +49,9 @@ class MessageFilter;
 namespace content {
 class GpuChannelManager;
 class GpuChannelMessageFilter;
+#ifndef DISABLE_MEDIA
 class GpuJpegDecodeAccelerator;
+#endif
 class GpuWatchdog;
 
 // Encapsulates an IPC channel between the GPU process and one renderer
@@ -196,7 +198,9 @@ class GpuChannel : public IPC::Listener,
       int32 route_id,
       bool* succeeded);
   void OnDestroyCommandBuffer(int32 route_id);
+#ifndef DISABLE_MEDIA
   void OnCreateJpegDecoder(int32 route_id, IPC::Message* reply_msg);
+#endif
 
   // Decrement the count of unhandled IPC messages and defer preemption.
   void MessageProcessed();
@@ -245,7 +249,9 @@ class GpuChannel : public IPC::Listener,
   typedef IDMap<GpuCommandBufferStub, IDMapOwnPointer> StubMap;
   StubMap stubs_;
 
+#ifndef DISABLE_MEDIA
   scoped_ptr<GpuJpegDecodeAccelerator> jpeg_decoder_;
+#endif
 
   bool log_messages_;  // True if we should log sent and received messages.
   gpu::gles2::DisallowedFeatures disallowed_features_;

@@ -138,11 +138,13 @@ class CONTENT_EXPORT RenderViewHost : virtual public RenderWidgetHost {
   // Instructs the RenderView to send back updates to the preferred size.
   virtual void EnablePreferredSizeMode() = 0;
 
+#ifndef DISABLE_MEDIA
   // Tells the renderer to perform the given action on the media player
   // located at the given point.
   virtual void ExecuteMediaPlayerActionAtLocation(
       const gfx::Point& location,
       const blink::WebMediaPlayerAction& action) = 0;
+#endif
 
   // Tells the renderer to perform the given action on the plugin located at
   // the given point.

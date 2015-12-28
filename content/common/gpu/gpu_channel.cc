@@ -692,8 +692,10 @@ bool GpuChannel::OnControlMessageReceived(const IPC::Message& msg) {
                         OnCreateOffscreenCommandBuffer)
     IPC_MESSAGE_HANDLER(GpuChannelMsg_DestroyCommandBuffer,
                         OnDestroyCommandBuffer)
+#ifndef DISABLE_MEDIA
     IPC_MESSAGE_HANDLER_DELAY_REPLY(GpuMsg_CreateJpegDecoder,
                                     OnCreateJpegDecoder)
+#endif
     IPC_MESSAGE_UNHANDLED(handled = false)
   IPC_END_MESSAGE_MAP()
   DCHECK(handled) << msg.type();
@@ -815,12 +817,14 @@ void GpuChannel::OnDestroyCommandBuffer(int32 route_id) {
   }
 }
 
+#ifndef DISABLE_MEDIA
 void GpuChannel::OnCreateJpegDecoder(int32 route_id, IPC::Message* reply_msg) {
   if (!jpeg_decoder_) {
     jpeg_decoder_.reset(new GpuJpegDecodeAccelerator(this, io_task_runner_));
   }
   jpeg_decoder_->AddClient(route_id, reply_msg);
 }
+#endif
 
 void GpuChannel::MessageProcessed() {
   messages_processed_++;

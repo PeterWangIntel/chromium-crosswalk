@@ -62,6 +62,7 @@ bool CanUseMediaStreamAPI(const RendererPpapiHost* host, PP_Instance instance) {
 }
 #endif  // defined(ENABLE_WEBRTC)
 
+#ifndef DISABLE_MEDIA
 static bool CanUseCameraDeviceAPI(const RendererPpapiHost* host,
                                   PP_Instance instance) {
   blink::WebPluginContainer* container =
@@ -75,6 +76,7 @@ static bool CanUseCameraDeviceAPI(const RendererPpapiHost* host,
   return content_renderer_client->IsPluginAllowedToUseCameraDeviceAPI(
       document_url);
 }
+#endif
 
 bool CanUseCompositorAPI(const RendererPpapiHost* host, PP_Instance instance) {
   blink::WebPluginContainer* container =
@@ -171,12 +173,14 @@ scoped_ptr<ResourceHost> ContentRendererPepperHostFactory::CreateResourceHost(
     case PpapiHostMsg_URLLoader_Create::ID:
       return scoped_ptr<ResourceHost>(
           new PepperURLLoaderHost(host_, false, instance, resource));
+#ifndef DISABLE_MEDIA
     case PpapiHostMsg_VideoDecoder_Create::ID:
       return scoped_ptr<ResourceHost>(
           new PepperVideoDecoderHost(host_, instance, resource));
     case PpapiHostMsg_VideoEncoder_Create::ID:
       return scoped_ptr<ResourceHost>(
           new PepperVideoEncoderHost(host_, instance, resource));
+#endif
     case PpapiHostMsg_WebSocket_Create::ID:
       return scoped_ptr<ResourceHost>(
           new PepperWebSocketHost(host_, instance, resource));
@@ -201,12 +205,15 @@ scoped_ptr<ResourceHost> ContentRendererPepperHostFactory::CreateResourceHost(
   // Dev interfaces.
   if (GetPermissions().HasPermission(ppapi::PERMISSION_DEV)) {
     switch (message.type()) {
+#ifndef DISABLE_MEDIA
       case PpapiHostMsg_AudioInput_Create::ID:
         return scoped_ptr<ResourceHost>(
             new PepperAudioInputHost(host_, instance, resource));
+#endif
       case PpapiHostMsg_FileChooser_Create::ID:
         return scoped_ptr<ResourceHost>(
             new PepperFileChooserHost(host_, instance, resource));
+#ifndef DISABLE_MEDIA
       case PpapiHostMsg_VideoCapture_Create::ID: {
         PepperVideoCaptureHost* host =
             new PepperVideoCaptureHost(host_, instance, resource);
@@ -216,9 +223,11 @@ scoped_ptr<ResourceHost> ContentRendererPepperHostFactory::CreateResourceHost(
         }
         return scoped_ptr<ResourceHost>(host);
       }
+#endif
     }
   }
 
+#ifndef DISABLE_MEDIA
   // Permissions of the following interfaces are available for whitelisted apps
   // which may not have access to the other private interfaces.
   if (message.type() == PpapiHostMsg_CameraDevice_Create::ID) {
@@ -229,6 +238,7 @@ scoped_ptr<ResourceHost> ContentRendererPepperHostFactory::CreateResourceHost(
         new PepperCameraDeviceHost(host_, instance, resource));
     return host->Init() ? host.Pass() : nullptr;
   }
+#endif
 
   return scoped_ptr<ResourceHost>();
 }

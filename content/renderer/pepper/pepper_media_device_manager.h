@@ -87,7 +87,6 @@ class PepperMediaDeviceManager
                           bool succeeded,
                           const std::string& label);
 
-
   MediaStreamDispatcher* GetMediaStreamDispatcher() const;
 
   int next_id_;

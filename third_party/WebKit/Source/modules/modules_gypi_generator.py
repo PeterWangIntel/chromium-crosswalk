@@ -3492,6 +3492,8 @@ def generate_modules_gypi(args):
     disable_plugins = args[6]
     disable_speech = args[7]
     disable_webaudio = args[8]
+    if disable_webaudio == 1:
+        disable_encryptedmedia = 1
     disable_webcl = args[9]
     disable_webdatabase = args[10]
     disable_webmidi = args[11]

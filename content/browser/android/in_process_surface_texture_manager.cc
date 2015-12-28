@@ -61,10 +61,12 @@ void InProcessSurfaceTextureManager::EstablishSurfaceTexturePeer(
   if (!surface_texture.get())
     return;
 
+#ifndef DISABLE_MEDIA
   BrowserThread::PostTask(
       BrowserThread::UI, FROM_HERE,
       base::Bind(&BrowserMediaPlayerManager::SetSurfacePeer, surface_texture,
                  render_process_handle, render_frame_id, player_id));
+#endif
 }
 
 InProcessSurfaceTextureManager::InProcessSurfaceTextureManager() {

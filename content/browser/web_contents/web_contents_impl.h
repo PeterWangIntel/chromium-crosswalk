@@ -22,7 +22,9 @@
 #include "content/browser/frame_host/navigator_delegate.h"
 #include "content/browser/frame_host/render_frame_host_delegate.h"
 #include "content/browser/frame_host/render_frame_host_manager.h"
+#ifndef DISABLE_MEDIA
 #include "content/browser/media/audio_state_provider.h"
+#endif
 #include "content/browser/renderer_host/render_view_host_delegate.h"
 #include "content/browser/renderer_host/render_view_host_impl.h"
 #include "content/browser/renderer_host/render_widget_host_delegate.h"
@@ -59,7 +61,9 @@ class GeolocationServiceContext;
 class InterstitialPageImpl;
 class JavaScriptDialogManager;
 class ManifestManagerHost;
+#ifndef DISABLE_MEDIA
 class MediaWebContentsObserver;
+#endif
 class PluginContentOriginWhitelist;
 class PowerSaveBlocker;
 class RenderViewHost;
@@ -69,7 +73,9 @@ class SavePackage;
 class ScreenOrientationDispatcherHost;
 class SiteInstance;
 class TestWebContents;
+#ifndef DISABLE_MEDIA
 class WebContentsAudioMuter;
+#endif
 class WebContentsDelegate;
 class WebContentsImpl;
 class WebContentsObserver;
@@ -277,8 +283,10 @@ class CONTENT_EXPORT WebContentsImpl
   void IncrementCapturerCount(const gfx::Size& capture_size) override;
   void DecrementCapturerCount() override;
   int GetCapturerCount() const override;
+#ifndef DISABLE_MEDIA
   bool IsAudioMuted() const override;
   void SetAudioMuted(bool mute) override;
+#endif
   bool IsCrashed() const override;
   void SetIsCrashed(base::TerminationStatus status, int error_code) override;
   base::TerminationStatus GetCrashedStatus() const override;
@@ -374,10 +382,12 @@ class CONTENT_EXPORT WebContentsImpl
   void ExitFullscreen() override;
   void ResumeLoadingCreatedWebContents() override;
 #if defined(OS_ANDROID)
+#ifndef DISABLE_MEDIA
   void OnMediaSessionStateChanged();
   void ResumeMediaSession() override;
   void SuspendMediaSession() override;
   void StopMediaSession() override;
+#endif
 
   base::android::ScopedJavaLocalRef<jobject> GetJavaWebContents() override;
   virtual WebContentsAndroid* GetWebContentsAndroid();
@@ -512,11 +522,13 @@ class CONTENT_EXPORT WebContentsImpl
                          bool user_gesture) override;
   void ShowCreatedWidget(int route_id, const gfx::Rect& initial_rect) override;
   void ShowCreatedFullscreenWidget(int route_id) override;
+#ifndef DISABLE_MEDIA
   void RequestMediaAccessPermission(
       const MediaStreamRequest& request,
       const MediaResponseCallback& callback) override;
   bool CheckMediaAccessPermission(const GURL& security_origin,
                                   MediaStreamType type) override;
+#endif
   SessionStorageNamespace* GetSessionStorageNamespace(
       SiteInstance* instance) override;
   SessionStorageNamespaceMap GetSessionStorageNamespaceMap() override;
@@ -702,9 +714,11 @@ class CONTENT_EXPORT WebContentsImpl
   // Forces overscroll to be disabled (used by touch emulation).
   void SetForceDisableOverscrollContent(bool force_disable);
 
+#ifndef DISABLE_MEDIA
   AudioStateProvider* audio_state_provider() {
     return audio_state_provider_.get();
   }
+#endif
 
   bool has_audio_power_save_blocker_for_testing() const {
     return audio_power_save_blocker_;
@@ -897,11 +911,13 @@ class CONTENT_EXPORT WebContentsImpl
 #endif  // defined(ENABLE_PLUGINS)
   void OnUpdateFaviconURL(const std::vector<FaviconURL>& candidates);
   void OnFirstVisuallyNonEmptyPaint();
+#ifndef DISABLE_MEDIA
   void OnMediaPlayingNotification(int64 player_cookie,
                                   bool has_video,
                                   bool has_audio,
                                   bool is_remote);
   void OnMediaPausedNotification(int64 player_cookie);
+#endif
   void OnShowValidationMessage(const gfx::Rect& anchor_in_root_view,
                                const base::string16& main_text,
                                const base::string16& sub_text);
@@ -1018,6 +1034,7 @@ class CONTENT_EXPORT WebContentsImpl
   // Helper methods for adding or removing player entries in |player_map| under
   // the key |render_frame_message_source_|.
   typedef std::vector<int64> PlayerList;
+#ifndef DISABLE_MEDIA
   typedef std::map<uintptr_t, PlayerList> ActiveMediaPlayerMap;
   void AddMediaPlayerEntry(int64 player_cookie,
                            ActiveMediaPlayerMap* player_map);
@@ -1026,6 +1043,7 @@ class CONTENT_EXPORT WebContentsImpl
   // Removes all entries from |player_map| for |render_frame_host|.
   void RemoveAllMediaPlayerEntries(RenderFrameHost* render_frame_host,
                                    ActiveMediaPlayerMap* player_map);
+#endif
 
   // Data for core operation ---------------------------------------------------
 
@@ -1073,15 +1091,19 @@ class CONTENT_EXPORT WebContentsImpl
   // Helper classes ------------------------------------------------------------
 
   // Tracking variables and associated power save blockers for media playback.
+#ifndef DISABLE_MEDIA
   ActiveMediaPlayerMap active_audio_players_;
   ActiveMediaPlayerMap active_video_players_;
+#endif
   scoped_ptr<PowerSaveBlocker> audio_power_save_blocker_;
   scoped_ptr<PowerSaveBlocker> video_power_save_blocker_;
 
   // Tells whether this WebContents is actively producing sound.
   // Order is important: the |frame_tree_| destruction uses
   // |audio_state_provider_|.
+#ifndef DISABLE_MEDIA
   scoped_ptr<AudioStateProvider> audio_state_provider_;
+#endif
 
   // Manages the frame tree of the page and process swaps in each node.
   FrameTree frame_tree_;
@@ -1314,7 +1336,9 @@ class CONTENT_EXPORT WebContentsImpl
 #endif
 
   // Created on-demand to mute all audio output from this WebContents.
+#ifndef DISABLE_MEDIA
   scoped_ptr<WebContentsAudioMuter> audio_muter_;
+#endif
 
   bool virtual_keyboard_requested_;
 

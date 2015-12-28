@@ -25,8 +25,10 @@
 #include "content/renderer/render_frame_proxy.h"
 #include "content/renderer/renderer_webcookiejar_impl.h"
 #include "ipc/ipc_message.h"
+#ifndef DISABLE_MEDIA
 #include "media/blink/webmediaplayer_delegate.h"
 #include "media/blink/webmediaplayer_params.h"
+#endif
 #include "mojo/application/public/interfaces/service_provider.mojom.h"
 #include "mojo/application/public/interfaces/shell.mojom.h"
 #include "third_party/WebKit/public/platform/modules/app_banner/WebAppBannerClient.h"
@@ -43,6 +45,7 @@
 #include "content/renderer/pepper/plugin_power_saver_helper.h"
 #endif
 
+#ifndef DISABLE_MEDIA
 #if defined(OS_ANDROID)
 #include "content/renderer/media/android/renderer_media_player_manager.h"
 #endif
@@ -50,6 +53,7 @@
 #if defined(ENABLE_MOJO_MEDIA)
 #include "media/mojo/interfaces/service_factory.mojom.h"
 #endif
+#endif  // ifndef DISABLE_MEDIA
 
 class GURL;
 class TransportDIB;
@@ -63,7 +67,9 @@ class WebGeolocationClient;
 #endif
 class WebMouseEvent;
 class WebContentDecryptionModule;
+#ifndef DISABLE_MEDIA
 class WebMediaPlayer;
+#endif
 class WebPresentationClient;
 class WebPushClient;
 class WebSecurityOrigin;
@@ -78,11 +84,13 @@ class Range;
 class Rect;
 }
 
+#ifndef DISABLE_MEDIA
 namespace media {
 class CdmFactory;
 class MediaPermission;
 class WebEncryptedMediaClientImpl;
 }
+#endif
 
 namespace mojo {
 class ServiceProvider;
@@ -99,9 +107,11 @@ class ExternalPopupMenu;
 class GeolocationDispatcher;
 #endif
 class ManifestManager;
+#ifndef DISABLE_MEDIA
 class MediaStreamDispatcher;
 class MediaStreamRendererFactory;
 class MediaPermissionDispatcher;
+#endif
 class MidiDispatcher;
 class NavigationState;
 #ifndef DISABLE_NOTIFICATIONS
@@ -121,7 +131,9 @@ class RenderViewImpl;
 class RenderWidget;
 class RenderWidgetFullscreenPepper;
 class ScreenOrientationDispatcher;
+#ifndef DISABLE_MEDIA
 class UserMediaClientImpl;
+#endif
 struct CommonNavigationParams;
 struct CustomContextMenuContext;
 struct FrameReplicationState;
@@ -134,8 +146,12 @@ class VRDispatcher;
 
 class CONTENT_EXPORT RenderFrameImpl
     : public RenderFrame,
+#ifndef DISABLE_MEDIA
       NON_EXPORTED_BASE(public blink::WebFrameClient),
       NON_EXPORTED_BASE(public media::WebMediaPlayerDelegate) {
+#else
+      NON_EXPORTED_BASE(public blink::WebFrameClient) {
+#endif
  public:
   // Creates a new RenderFrame. |render_view| is the RenderView object that this
   // frame belongs to.
@@ -314,9 +330,11 @@ class CONTENT_EXPORT RenderFrameImpl
                                bool keep_selection);
 #endif  // defined(ENABLE_PLUGINS)
 
+#ifndef DISABLE_MEDIA
   // May return NULL in some cases, especially if userMediaClient() returns
   // NULL.
   MediaStreamDispatcher* GetMediaStreamDispatcher();
+#endif
 
 #if defined(OS_MACOSX) || defined(OS_ANDROID)
   void DidHideExternalPopupMenu();
@@ -374,12 +392,14 @@ class CONTENT_EXPORT RenderFrameImpl
       const blink::WebPluginParams&) override;
   virtual blink::WebPlugin* createPlugin(blink::WebLocalFrame* frame,
                                          const blink::WebPluginParams& params);
+#ifndef DISABLE_MEDIA
   virtual blink::WebMediaPlayer* createMediaPlayer(
       blink::WebLocalFrame* frame,
       const blink::WebURL& url,
       blink::WebMediaPlayerClient* client,
       blink::WebMediaPlayerEncryptedMediaClient* encrypted_client,
       blink::WebContentDecryptionModule* initial_cdm);
+#endif
   virtual blink::WebApplicationCacheHost* createApplicationCacheHost(
       blink::WebLocalFrame* frame,
       blink::WebApplicationCacheHostClient* client);
@@ -527,9 +547,11 @@ class CONTENT_EXPORT RenderFrameImpl
   virtual void willStartUsingPeerConnectionHandler(
       blink::WebLocalFrame* frame,
       blink::WebRTCPeerConnectionHandler* handler);
+#ifndef DISABLE_MEDIA
   virtual blink::WebUserMediaClient* userMediaClient();
   virtual blink::WebEncryptedMediaClient* encryptedMediaClient();
   virtual blink::WebMIDIClient* webMIDIClient();
+#endif
   virtual bool willCheckAndDispatchMessageEvent(
       blink::WebLocalFrame* source_frame,
       blink::WebFrame* target_frame,
@@ -574,10 +596,12 @@ class CONTENT_EXPORT RenderFrameImpl
   blink::WebVRClient* webVRClient() override;
 #endif
 
+#ifndef DISABLE_MEDIA
   // WebMediaPlayerDelegate implementation:
   void DidPlay(blink::WebMediaPlayer* player) override;
   void DidPause(blink::WebMediaPlayer* player) override;
   void PlayerGone(blink::WebMediaPlayer* player) override;
+#endif
 
   // Make this frame show an empty, unscriptable page.
   // TODO(nasko): Remove this method once swapped out state is no longer used.
@@ -782,6 +806,7 @@ class CONTENT_EXPORT RenderFrameImpl
                                        bool notify_result,
                                        v8::Local<v8::Value> result);
 
+#ifndef DISABLE_MEDIA
   // Initializes |web_user_media_client_|. If this fails, because it wasn't
   // possible to create a MediaStreamClient (e.g., WebRTC is disabled), then
   // |web_user_media_client_| will remain NULL.
@@ -792,6 +817,7 @@ class CONTENT_EXPORT RenderFrameImpl
 
   // Creates a factory object used for creating audio and video renderers.
   scoped_ptr<MediaStreamRendererFactory> CreateRendererFactory();
+#endif
 
   // Does preparation for the navigation to |url|.
   void PrepareRenderViewForNavigation(
@@ -829,6 +855,7 @@ class CONTENT_EXPORT RenderFrameImpl
   // saved in OnNavigate().
   NavigationState* CreateNavigationStateFromPending();
 
+#ifndef DISABLE_MEDIA
 #if defined(OS_ANDROID)
   blink::WebMediaPlayer* CreateAndroidWebMediaPlayer(
       blink::WebMediaPlayerClient* client,
@@ -850,6 +877,7 @@ class CONTENT_EXPORT RenderFrameImpl
 #endif
 
   media::CdmFactory* GetCdmFactory();
+#endif
 
   void RegisterMojoServices();
 
@@ -955,6 +983,7 @@ class CONTENT_EXPORT RenderFrameImpl
   NotificationPermissionDispatcher* notification_permission_dispatcher_;
 #endif
 
+#ifndef DISABLE_MEDIA
   // Destroyed via the RenderFrameObserver::OnDestruct() mechanism.
   UserMediaClientImpl* web_user_media_client_;
 
@@ -968,10 +997,12 @@ class CONTENT_EXPORT RenderFrameImpl
   // The media factory attached to this frame, lazily initialized.
   media::interfaces::ServiceFactoryPtr media_service_factory_;
 #endif
+#endif  // ifndef DISABLE_MEDIA
 
   // MidiClient attached to this frame; lazily initialized.
   MidiDispatcher* midi_dispatcher_;
 
+#ifndef DISABLE_MEDIA
 #if defined(OS_ANDROID)
   // Manages all media players in this render frame for communicating with the
   // real media player in the browser process. It's okay to use a raw pointer
@@ -997,6 +1028,7 @@ class CONTENT_EXPORT RenderFrameImpl
 
   // True if this RenderFrame has ever played media.
   bool has_played_media_;
+#endif  // ifndef DISABLE_MEDIA
 
   // The devtools agent for this frame; only created for main frame and
   // local roots.

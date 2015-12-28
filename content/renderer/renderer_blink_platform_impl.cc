@@ -53,9 +53,11 @@
 #include "content/renderer/device_sensors/device_orientation_event_pump.h"
 #include "content/renderer/dom_storage/webstoragenamespace_impl.h"
 #include "content/renderer/gamepad_shared_memory_reader.h"
+#ifndef DISABLE_MEDIA
 #include "content/renderer/media/audio_decoder.h"
 #include "content/renderer/media/renderer_webaudiodevice_impl.h"
 #include "content/renderer/media/renderer_webmidiaccessor_impl.h"
+#endif
 #include "content/renderer/render_thread_impl.h"
 #include "content/renderer/renderer_clipboard_delegate.h"
 #include "content/renderer/screen_orientation/screen_orientation_observer.h"
@@ -64,12 +66,14 @@
 #include "content/renderer/webpublicsuffixlist_impl.h"
 #include "gpu/config/gpu_info.h"
 #include "ipc/ipc_sync_message_filter.h"
+#ifndef DISABLE_MEDIA
 #include "media/audio/audio_output_device.h"
 #include "media/base/audio_hardware_config.h"
 #include "media/base/key_systems.h"
 #include "media/base/mime_util.h"
 #include "media/blink/webcontentdecryptionmodule_impl.h"
 #include "media/filters/stream_parser_factory.h"
+#endif
 #include "storage/common/database/database_identifier.h"
 #include "storage/common/quota/quota_types.h"
 #include "third_party/WebKit/public/platform/WebBatteryStatusListener.h"
@@ -89,7 +93,9 @@
 
 #if defined(OS_ANDROID)
 #include "content/renderer/android/synchronous_compositor_factory.h"
+#ifndef DISABLE_MEDIA
 #include "content/renderer/media/android/audio_decoder_android.h"
+#endif
 #include "gpu/blink/webgraphicscontext3d_in_process_command_buffer_impl.h"
 #endif
 
@@ -415,6 +421,7 @@ RendererBlinkPlatformImpl::MimeRegistry::supportsMediaMIMEType(
     const WebString& mime_type,
     const WebString& codecs,
     const WebString& key_system) {
+#ifndef DISABLE_MEDIA
   const std::string mime_type_ascii = ToASCIIOrEmpty(mime_type);
   // Not supporting the container is a flat-out no.
   if (!media::IsSupportedMediaMimeType(mime_type_ascii))
@@ -458,18 +465,25 @@ RendererBlinkPlatformImpl::MimeRegistry::supportsMediaMIMEType(
 
   // Otherwise we have a perfect match.
   return IsSupported;
+#else
+    return IsNotSupported;
+#endif  // ifndef DISABLE_MEDIA
 }
 
 bool RendererBlinkPlatformImpl::MimeRegistry::supportsMediaSourceMIMEType(
     const blink::WebString& mime_type,
     const WebString& codecs) {
   const std::string mime_type_ascii = ToASCIIOrEmpty(mime_type);
+#ifndef DISABLE_MEDIA
   std::vector<std::string> parsed_codec_ids;
   media::ParseCodecString(ToASCIIOrEmpty(codecs), &parsed_codec_ids, false);
   if (mime_type_ascii.empty())
     return false;
   return media::StreamParserFactory::IsTypeSupported(
       mime_type_ascii, parsed_codec_ids);
+#else
+  return false;
+#endif
 }
 
 WebString RendererBlinkPlatformImpl::MimeRegistry::mimeTypeForExtension(
@@ -660,6 +674,7 @@ bool RendererBlinkPlatformImpl::isThreadedAnimationEnabled() {
   return thread ? thread->IsThreadedAnimationEnabled() : true;
 }
 
+#ifndef DISABLE_MEDIA
 double RendererBlinkPlatformImpl::audioHardwareSampleRate() {
   RenderThreadImpl* thread = RenderThreadImpl::current();
   return thread->GetAudioHardwareConfig()->GetOutputSampleRate();
@@ -674,11 +689,13 @@ unsigned RendererBlinkPlatformImpl::audioHardwareOutputChannels() {
   RenderThreadImpl* thread = RenderThreadImpl::current();
   return thread->GetAudioHardwareConfig()->GetOutputChannels();
 }
+#endif  // ifndef DISABLE_MEDIA
 
 WebDatabaseObserver* RendererBlinkPlatformImpl::databaseObserver() {
   return web_database_observer_impl_.get();
 }
 
+#ifndef DISABLE_MEDIA
 WebAudioDevice* RendererBlinkPlatformImpl::createAudioDevice(
     size_t buffer_size,
     unsigned input_channels,
@@ -778,6 +795,7 @@ blink::WebMIDIAccessor* RendererBlinkPlatformImpl::createMIDIAccessor(
 
   return new RendererWebMIDIAccessorImpl(client);
 }
+#endif  // ifndef DISABLE_MEDIA
 
 void RendererBlinkPlatformImpl::getPluginList(
     bool refresh,

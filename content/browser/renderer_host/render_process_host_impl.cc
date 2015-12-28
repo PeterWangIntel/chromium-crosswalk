@@ -76,9 +76,11 @@
 #endif
 #include "content/browser/loader/resource_message_filter.h"
 #include "content/browser/loader/resource_scheduler_filter.h"
+#ifndef DISABLE_MEDIA
 #include "content/browser/media/capture/audio_mirroring_manager.h"
 #include "content/browser/media/media_internals.h"
 #include "content/browser/media/midi_host.h"
+#endif
 #include "content/browser/message_port_message_filter.h"
 #include "content/browser/mime_registry_message_filter.h"
 #include "content/browser/mojo/mojo_application_host.h"
@@ -96,11 +98,13 @@
 #include "content/browser/renderer_host/file_utilities_message_filter.h"
 #include "content/browser/renderer_host/gamepad_browser_message_filter.h"
 #include "content/browser/renderer_host/gpu_message_filter.h"
+#ifndef DISABLE_MEDIA
 #include "content/browser/renderer_host/media/audio_input_renderer_host.h"
 #include "content/browser/renderer_host/media/audio_renderer_host.h"
 #include "content/browser/renderer_host/media/media_stream_dispatcher_host.h"
 #include "content/browser/renderer_host/media/peer_connection_tracker_host.h"
 #include "content/browser/renderer_host/media/video_capture_host.h"
+#endif
 #include "content/browser/renderer_host/memory_benchmark_message_filter.h"
 #include "content/browser/renderer_host/pepper/pepper_message_filter.h"
 #include "content/browser/renderer_host/pepper/pepper_renderer_connection.h"
@@ -184,7 +188,9 @@
 
 #if defined(OS_ANDROID)
 #include "content/browser/android/child_process_launcher_android.h"
+#ifndef DISABLE_MEDIA
 #include "content/browser/media/android/browser_demuxer_android.h"
+#endif
 #include "content/browser/mojo/service_registrar_android.h"
 #include "content/browser/screen_orientation/screen_orientation_message_filter_android.h"
 #endif
@@ -753,9 +759,12 @@ void RenderProcessHostImpl::CreateMessageFilters() {
   const base::CommandLine& browser_command_line =
       *base::CommandLine::ForCurrentProcess();
   AddFilter(new ResourceSchedulerFilter(GetID()));
+
+#ifndef DISABLE_MEDIA
   MediaInternals* media_internals = MediaInternals::GetInstance();
   media::AudioManager* audio_manager =
       BrowserMainLoop::GetInstance()->audio_manager();
+#endif
   // Add BrowserPluginMessageFilter to ensure it gets the first stab at messages
   // from guests.
   scoped_refptr<BrowserPluginMessageFilter> bp_message_filter(
@@ -773,8 +782,13 @@ void RenderProcessHostImpl::CreateMessageFilters() {
           GetBrowserContext(),
           GetBrowserContext()->GetRequestContextForRenderProcess(GetID()),
           widget_helper_.get(),
+#ifndef DISABLE_MEDIA
           audio_manager,
           media_internals,
+#else
+          nullptr,
+          nullptr,
+#endif
           storage_partition_impl_->GetDOMStorageContext()));
   AddFilter(render_message_filter.get());
   AddFilter(
@@ -801,6 +815,7 @@ void RenderProcessHostImpl::CreateMessageFilters() {
       get_contexts_callback);
 
   AddFilter(resource_message_filter);
+#ifndef DISABLE_MEDIA
   MediaStreamManager* media_stream_manager =
       BrowserMainLoop::GetInstance()->media_stream_manager();
   AddFilter(new AudioInputRendererHost(
@@ -822,6 +837,7 @@ void RenderProcessHostImpl::CreateMessageFilters() {
   AddFilter(
       new MidiHost(GetID(), BrowserMainLoop::GetInstance()->midi_manager()));
   AddFilter(new VideoCaptureHost(media_stream_manager));
+#endif
   AddFilter(new AppCacheDispatcherHost(
       storage_partition_impl_->GetAppCacheService(),
       GetID()));
@@ -876,10 +892,12 @@ void RenderProcessHostImpl::CreateMessageFilters() {
   // GDI fonts (http://crbug.com/383227), even when using DirectWrite. This
   // should eventually be if (!ShouldUseDirectWrite()) guarded.
   channel_->AddFilter(new FontCacheDispatcher());
+#ifndef DISABLE_MEDIA
 #elif defined(OS_ANDROID)
   browser_demuxer_android_ = new BrowserDemuxerAndroid();
   AddFilter(browser_demuxer_android_.get());
 #endif
+#endif  // ifndef DISABLE_MEDIA
 #if defined(ENABLE_BROWSER_CDMS)
   AddFilter(new BrowserCdmManager(GetID(), NULL));
 #endif
@@ -2294,9 +2312,11 @@ void RenderProcessHostImpl::SetBackgrounded(bool backgrounded) {
   if (!child_process_launcher_.get() || child_process_launcher_->IsStarting())
     return;
 
+#ifndef DISABLE_MEDIA
   // Don't background processes which have active audio streams.
   if (backgrounded_ && audio_renderer_host_->HasActiveAudio())
     return;
+#endif
 
   const base::CommandLine* command_line =
       base::CommandLine::ForCurrentProcess();
@@ -2429,10 +2449,12 @@ void RenderProcessHostImpl::OnProcessLaunchFailed() {
   ProcessDied(true, &details);
 }
 
+#ifndef DISABLE_MEDIA
 scoped_refptr<AudioRendererHost>
 RenderProcessHostImpl::audio_renderer_host() const {
   return audio_renderer_host_;
 }
+#endif
 
 void RenderProcessHostImpl::OnUserMetricsRecordAction(
     const std::string& action) {
@@ -2559,10 +2581,12 @@ void RenderProcessHostImpl::DecrementWorkerRefCount() {
     Cleanup();
 }
 
+#ifndef DISABLE_MEDIA
 void RenderProcessHostImpl::GetAudioOutputControllers(
     const GetAudioOutputControllersCallback& callback) const {
   audio_renderer_host()->GetOutputControllers(callback);
 }
+#endif
 
 #ifndef DISABLE_BLUETOOTH
 BluetoothDispatcherHost* RenderProcessHostImpl::GetBluetoothDispatcherHost() {

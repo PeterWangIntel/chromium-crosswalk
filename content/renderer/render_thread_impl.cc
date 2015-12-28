@@ -98,6 +98,7 @@
 #include "content/renderer/input/input_event_filter.h"
 #include "content/renderer/input/input_handler_manager.h"
 #include "content/renderer/input/main_thread_input_event_filter.h"
+#ifndef DISABLE_MEDIA
 #include "content/renderer/media/aec_dump_message_filter.h"
 #include "content/renderer/media/audio_input_message_filter.h"
 #include "content/renderer/media/audio_message_filter.h"
@@ -108,6 +109,7 @@
 #include "content/renderer/media/renderer_gpu_video_accelerator_factories.h"
 #include "content/renderer/media/video_capture_impl_manager.h"
 #include "content/renderer/media/video_capture_message_filter.h"
+#endif
 #include "content/renderer/net_info_helper.h"
 #include "content/renderer/p2p/socket_dispatcher.h"
 #include "content/renderer/raster_worker_pool.h"
@@ -126,9 +128,11 @@
 #include "ipc/ipc_channel_handle.h"
 #include "ipc/ipc_platform_file.h"
 #include "ipc/mojo/ipc_channel_mojo.h"
+#ifndef DISABLE_MEDIA
 #include "media/base/audio_hardware_config.h"
 #include "media/base/media.h"
 #include "media/renderers/gpu_video_accelerator_factories.h"
+#endif
 #include "mojo/common/common_type_converters.h"
 #include "net/base/net_errors.h"
 #include "net/base/port_util.h"
@@ -159,7 +163,9 @@
 #if defined(OS_ANDROID)
 #include <cpu-features.h>
 #include "content/renderer/android/synchronous_compositor_factory.h"
+#ifndef DISABLE_MEDIA
 #include "content/renderer/media/android/renderer_demuxer_android.h"
+#endif
 #endif
 
 #if defined(OS_MACOSX)
@@ -183,11 +189,13 @@
 #include "content/renderer/npapi/plugin_channel_host.h"
 #endif
 
+#ifndef DISABLE_MEDIA
 #if defined(ENABLE_WEBRTC)
 #include "content/renderer/media/peer_connection_tracker.h"
 #include "content/renderer/media/rtc_peer_connection_handler.h"
 #include "content/renderer/media/webrtc/peer_connection_dependency_factory.h"
 #include "content/renderer/media/webrtc_identity_service.h"
+#endif
 #endif
 
 #ifdef ENABLE_VTUNE_JIT_INTERFACE
@@ -596,8 +604,10 @@ void RenderThreadImpl::Init() {
   db_message_filter_ = new DBMessageFilter();
   AddFilter(db_message_filter_.get());
 
+#ifndef DISABLE_MEDIA
   vc_manager_.reset(new VideoCaptureImplManager());
   AddFilter(vc_manager_->video_capture_message_filter());
+#endif
 
   browser_plugin_manager_.reset(new BrowserPluginManager());
   AddObserver(browser_plugin_manager_.get());
@@ -612,14 +622,17 @@ void RenderThreadImpl::Init() {
 
   webrtc_identity_service_.reset(new WebRTCIdentityService());
 
+#ifndef DISABLE_MEDIA
   aec_dump_message_filter_ = new AecDumpMessageFilter(
       GetIOMessageLoopProxy(), message_loop()->task_runner());
   AddFilter(aec_dump_message_filter_.get());
+#endif
 
   peer_connection_factory_.reset(new PeerConnectionDependencyFactory(
       p2p_socket_dispatcher_.get()));
 #endif  // defined(ENABLE_WEBRTC)
 
+#ifndef DISABLE_MEDIA
   audio_input_message_filter_ =
       new AudioInputMessageFilter(GetIOMessageLoopProxy());
   AddFilter(audio_input_message_filter_.get());
@@ -629,6 +642,7 @@ void RenderThreadImpl::Init() {
 
   midi_message_filter_ = new MidiMessageFilter(GetIOMessageLoopProxy());
   AddFilter(midi_message_filter_.get());
+#endif
 
 #ifndef DISABLE_BLUETOOTH
   bluetooth_message_filter_ = new BluetoothMessageFilter(thread_safe_sender());
@@ -721,9 +735,11 @@ void RenderThreadImpl::Init() {
     is_distance_field_text_enabled_ = false;
   }
 
+#ifndef DISABLE_MEDIA
   // Note that under Linux, the media library will normally already have
   // been initialized by the Zygote before this instance became a Renderer.
   media::InitializeMediaLibrary();
+#endif
 
   memory_pressure_listener_.reset(new base::MemoryPressureListener(
       base::Bind(&RenderThreadImpl::OnMemoryPressure, base::Unretained(this))));
@@ -799,8 +815,10 @@ void RenderThreadImpl::Shutdown() {
     devtools_agent_message_filter_ = NULL;
   }
 
+#ifndef DISABLE_MEDIA
   RemoveFilter(audio_input_message_filter_.get());
   audio_input_message_filter_ = NULL;
+#endif
 
 #if defined(ENABLE_WEBRTC)
   RTCPeerConnectionHandler::DestructAllHandlers();
@@ -810,8 +828,10 @@ void RenderThreadImpl::Shutdown() {
   // by the PC factory.  Once those tasks have been freed, the factory can be
   // deleted.
 #endif
+#ifndef DISABLE_MEDIA
   RemoveFilter(vc_manager_->video_capture_message_filter());
   vc_manager_.reset();
+#endif
 
   RemoveFilter(db_message_filter_.get());
   db_message_filter_ = NULL;
@@ -827,9 +847,11 @@ void RenderThreadImpl::Shutdown() {
 
   media_thread_.reset();
 
+#ifndef DISABLE_MEDIA
   // AudioMessageFilter may be accessed on |media_thread_|, so shutdown after.
   RemoveFilter(audio_message_filter_.get());
   audio_message_filter_ = NULL;
+#endif
 
   compositor_thread_.reset();
 
@@ -1155,7 +1177,9 @@ void RenderThreadImpl::EnsureWebKitInitialized() {
   EnableBlinkPlatformLogChannels(
       command_line.GetSwitchValueASCII(switches::kBlinkPlatformLogChannels));
 
+#ifndef DISABLE_MEDIA
   RenderMediaClient::Initialize();
+#endif
 
   FOR_EACH_OBSERVER(RenderProcessObserver, observers_, WebKitInitialized());
 
@@ -1322,6 +1346,7 @@ void RenderThreadImpl::PostponeIdleNotification() {
   idle_notifications_to_skip_ = 2;
 }
 
+#ifndef DISABLE_MEDIA
 scoped_refptr<media::GpuVideoAcceleratorFactories>
 RenderThreadImpl::GetGpuFactories() {
   DCHECK(IsMainThread());
@@ -1387,6 +1412,7 @@ RenderThreadImpl::GetGpuFactories() {
   }
   return gpu_factories;
 }
+#endif  // ifndef DISABLE_MEDIA
 
 scoped_ptr<WebGraphicsContext3DCommandBufferImpl>
 RenderThreadImpl::CreateOffscreenContext3d() {
@@ -1430,6 +1456,7 @@ RenderThreadImpl::SharedMainThreadContextProvider() {
   return shared_main_thread_contexts_;
 }
 
+#ifndef DISABLE_MEDIA
 AudioRendererMixerManager* RenderThreadImpl::GetAudioRendererMixerManager() {
   if (!audio_renderer_mixer_manager_) {
     audio_renderer_mixer_manager_.reset(new AudioRendererMixerManager(
@@ -1452,6 +1479,7 @@ media::AudioHardwareConfig* RenderThreadImpl::GetAudioHardwareConfig() {
 
   return audio_hardware_config_.get();
 }
+#endif
 
 base::WaitableEvent* RenderThreadImpl::GetShutdownEvent() {
   return ChildProcess::current()->GetShutDownEvent();
@@ -1878,9 +1906,11 @@ RenderThreadImpl::GetMediaThreadTaskRunner() {
     media_thread_.reset(new base::Thread("Media"));
     media_thread_->Start();
 
+#ifndef DISABLE_MEDIA
 #if defined(OS_ANDROID)
     renderer_demuxer_ = new RendererDemuxerAndroid();
     AddFilter(renderer_demuxer_.get());
+#endif
 #endif
   }
   return media_thread_->task_runner();

@@ -27,6 +27,7 @@ class TraceEventSystemStatsMonitor;
 }  // namespace trace_event
 }  // namespace base
 
+#ifndef DISABLE_MEDIA
 namespace media {
 class AudioManager;
 class UserInputMonitor;
@@ -34,6 +35,7 @@ namespace midi {
 class MidiManager;
 }  // namespace midi
 }  // namespace media
+#endif  // ifndef DISABLE_MEDIA
 
 namespace net {
 class NetworkChangeNotifier;
@@ -106,14 +108,18 @@ class CONTENT_EXPORT BrowserMainLoop {
 
   int GetResultCode() const { return result_code_; }
 
+#ifndef DISABLE_MEDIA
   media::AudioManager* audio_manager() const { return audio_manager_.get(); }
+#endif
   MediaStreamManager* media_stream_manager() const {
     return media_stream_manager_.get();
   }
+#ifndef DISABLE_MEDIA
   media::UserInputMonitor* user_input_monitor() const {
     return user_input_monitor_.get();
   }
   media::midi::MidiManager* midi_manager() const { return midi_manager_.get(); }
+#endif
   base::Thread* indexed_db_thread() const { return indexed_db_thread_.get(); }
 
   bool is_tracing_startup() const { return is_tracing_startup_; }
@@ -240,11 +246,13 @@ class CONTENT_EXPORT BrowserMainLoop {
   scoped_ptr<base::Thread> indexed_db_thread_;
   scoped_ptr<MojoShellContext> mojo_shell_context_;
 
+#ifndef DISABLE_MEDIA
   // |user_input_monitor_| has to outlive |audio_manager_|, so declared first.
   scoped_ptr<media::UserInputMonitor> user_input_monitor_;
   scoped_ptr<media::AudioManager> audio_manager_;
 
   scoped_ptr<media::midi::MidiManager> midi_manager_;
+#endif
 
 #if defined(USE_UDEV)
   scoped_ptr<DeviceMonitorLinux> device_monitor_linux_;

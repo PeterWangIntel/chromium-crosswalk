@@ -43,8 +43,10 @@ class SubscriptionRefSet;
 namespace content {
 
 class GpuChannel;
+#ifndef DISABLE_MEDIA
 class GpuVideoDecodeAccelerator;
 class GpuVideoEncodeAccelerator;
+#endif
 class GpuWatchdog;
 struct WaitForCommandState;
 
@@ -182,6 +184,7 @@ class GpuCommandBufferStub
   void OnDestroyTransferBuffer(int32 id);
   void OnGetTransferBuffer(int32 id, IPC::Message* reply_message);
 
+#ifndef DISABLE_MEDIA
   void OnCreateVideoDecoder(media::VideoCodecProfile profile,
                             int32 route_id,
                             IPC::Message* reply_message);
@@ -191,6 +194,7 @@ class GpuCommandBufferStub
                             uint32 initial_bitrate,
                             int32 route_id,
                             IPC::Message* reply_message);
+#endif
 
   void OnSetSurfaceVisible(bool visible);
 

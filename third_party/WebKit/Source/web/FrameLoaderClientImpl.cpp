@@ -54,7 +54,9 @@
 #include "modules/device_light/DeviceLightController.h"
 #include "modules/device_orientation/DeviceMotionController.h"
 #include "modules/device_orientation/DeviceOrientationController.h"
+#ifndef DISABLE_MEDIA
 #include "modules/encryptedmedia/HTMLMediaElementEncryptedMedia.h"
+#endif
 #include "modules/gamepad/NavigatorGamepad.h"
 #include "modules/serviceworkers/NavigatorServiceWorker.h"
 #include "modules/storage/DOMWindowStorageController.h"
@@ -225,10 +227,15 @@ bool FrameLoaderClientImpl::allowImage(bool enabledPerSettings, const KURL& imag
 
 bool FrameLoaderClientImpl::allowMedia(const KURL& mediaURL)
 {
+#ifndef DISABLE_MEDIA
     if (m_webFrame->contentSettingsClient())
         return m_webFrame->contentSettingsClient()->allowMedia(mediaURL);
 
     return true;
+#else
+    (void) mediaURL;
+    return false;
+#endif
 }
 
 bool FrameLoaderClientImpl::allowDisplayingInsecureContent(bool enabledPerSettings, SecurityOrigin* context, const KURL& url)
@@ -784,6 +791,7 @@ PassOwnPtr<WebMediaPlayer> FrameLoaderClientImpl::createWebMediaPlayer(
     const WebURL& url,
     WebMediaPlayerClient* client)
 {
+#ifndef DISABLE_MEDIA
     WebLocalFrameImpl* webFrame = WebLocalFrameImpl::fromFrame(
         htmlMediaElement.document().frame());
 
@@ -794,6 +802,9 @@ PassOwnPtr<WebMediaPlayer> FrameLoaderClientImpl::createWebMediaPlayer(
     return adoptPtr(webFrame->client()->createMediaPlayer(webFrame, url,
         client, &encryptedMedia,
         encryptedMedia.contentDecryptionModule()));
+#else
+    return nullptr;
+#endif
 }
 
 ObjectContentType FrameLoaderClientImpl::objectContentType(

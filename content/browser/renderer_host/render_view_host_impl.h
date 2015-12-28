@@ -30,7 +30,9 @@
 
 class SkBitmap;
 class FrameMsg_Navigate;
+#ifndef DISABLE_MEDIA
 struct MediaPlayerAction;
+#endif
 struct ViewHostMsg_CreateWindow_Params;
 struct ViewMsg_PostMessage_Params;
 
@@ -48,7 +50,9 @@ class AXTree;
 
 namespace content {
 
+#ifndef DISABLE_MEDIA
 class MediaWebContentsObserver;
+#endif
 class ChildProcessSecurityPolicyImpl;
 class PageState;
 class RenderWidgetHostDelegate;
@@ -155,9 +159,11 @@ class CONTENT_EXPORT RenderViewHostImpl
                         const gfx::Size& max_size) override;
   void DisableAutoResize(const gfx::Size& new_size) override;
   void EnablePreferredSizeMode() override;
+#ifndef DISABLE_MEDIA
   void ExecuteMediaPlayerActionAtLocation(
       const gfx::Point& location,
       const blink::WebMediaPlayerAction& action) override;
+#endif
   void ExecutePluginActionAtLocation(
       const gfx::Point& location,
       const blink::WebPluginAction& action) override;

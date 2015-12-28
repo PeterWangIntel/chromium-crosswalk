@@ -46,10 +46,14 @@ class ChannelMojoHost;
 }
 
 namespace content {
+#ifndef DISABLE_MEDIA
 class AudioRendererHost;
+#endif
 class BluetoothDispatcherHost;
 class BrowserCdmManager;
+#ifndef DISABLE_MEDIA
 class BrowserDemuxerAndroid;
+#endif
 class GpuMessageFilter;
 class InProcessChildThreadParams;
 class MessagePortMessageFilter;
@@ -174,7 +178,9 @@ class CONTENT_EXPORT RenderProcessHostImpl
   void OnProcessLaunched() override;
   void OnProcessLaunchFailed() override;
 
+#ifndef DISABLE_MEDIA
   scoped_refptr<AudioRendererHost> audio_renderer_host() const;
+#endif
 
   // Call this function when it is evident that the child process is actively
   // performing some operation, for example if we just received an IPC message.
@@ -244,10 +250,12 @@ class CONTENT_EXPORT RenderProcessHostImpl
   static void RegisterRendererMainThreadFactory(
       RendererMainThreadFactoryFunction create);
 
+#ifndef DISABLE_MEDIA
 #if defined(OS_ANDROID)
   const scoped_refptr<BrowserDemuxerAndroid>& browser_demuxer_android() {
     return browser_demuxer_android_;
   }
+#endif
 #endif
 
   MessagePortMessageFilter* message_port_message_filter() const {
@@ -270,8 +278,10 @@ class CONTENT_EXPORT RenderProcessHostImpl
   void IncrementWorkerRefCount();
   void DecrementWorkerRefCount();
 
+#ifndef DISABLE_MEDIA
   void GetAudioOutputControllers(
       const GetAudioOutputControllersCallback& callback) const override;
+#endif
 
   BluetoothDispatcherHost* GetBluetoothDispatcherHost();
 
@@ -433,9 +443,13 @@ class CONTENT_EXPORT RenderProcessHostImpl
   // RenderFrames.
   bool is_for_guests_only_;
 
+#ifndef DISABLE_MEDIA
+#if defined(ENABLE_WEBRTC) // WebRTC must be disabled if media is disabled
   // Forwards messages between WebRTCInternals in the browser process
   // and PeerConnectionTracker in the renderer process.
   scoped_refptr<PeerConnectionTrackerHost> peer_connection_tracker_host_;
+#endif
+#endif
 
   // Prevents the class from being added as a GpuDataManagerImpl observer more
   // than once.
@@ -452,14 +466,18 @@ class CONTENT_EXPORT RenderProcessHostImpl
   // Forwards power state messages to the renderer process.
   PowerMonitorMessageBroadcaster power_monitor_broadcaster_;
 
+#ifndef DISABLE_MEDIA
   scoped_refptr<AudioRendererHost> audio_renderer_host_;
+#endif
 
 #ifndef DISABLE_BLUETOOTH
   scoped_refptr<BluetoothDispatcherHost> bluetooth_dispatcher_host_;
 #endif
 
+#ifndef DISABLE_MEDIA
 #if defined(OS_ANDROID)
   scoped_refptr<BrowserDemuxerAndroid> browser_demuxer_android_;
+#endif
 #endif
 
 #if defined(ENABLE_WEBRTC)

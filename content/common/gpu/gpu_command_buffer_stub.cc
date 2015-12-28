@@ -19,8 +19,10 @@
 #include "content/common/gpu/gpu_messages.h"
 #include "content/common/gpu/gpu_watchdog.h"
 #include "content/common/gpu/image_transport_surface.h"
+#ifndef DISABLE_MEDIA
 #include "content/common/gpu/media/gpu_video_decode_accelerator.h"
 #include "content/common/gpu/media/gpu_video_encode_accelerator.h"
+#endif
 #include "content/public/common/content_client.h"
 #include "content/public/common/content_switches.h"
 #include "gpu/command_buffer/common/constants.h"
@@ -286,10 +288,12 @@ bool GpuCommandBufferStub::OnMessageReceived(const IPC::Message& message) {
                         OnRegisterTransferBuffer);
     IPC_MESSAGE_HANDLER(GpuCommandBufferMsg_DestroyTransferBuffer,
                         OnDestroyTransferBuffer);
+#ifndef DISABLE_MEDIA
     IPC_MESSAGE_HANDLER_DELAY_REPLY(GpuCommandBufferMsg_CreateVideoDecoder,
                                     OnCreateVideoDecoder)
     IPC_MESSAGE_HANDLER_DELAY_REPLY(GpuCommandBufferMsg_CreateVideoEncoder,
                                     OnCreateVideoEncoder)
+#endif
     IPC_MESSAGE_HANDLER(GpuCommandBufferMsg_SetSurfaceVisible,
                         OnSetSurfaceVisible)
     IPC_MESSAGE_HANDLER(GpuCommandBufferMsg_RetireSyncPoint,
@@ -841,6 +845,7 @@ void GpuCommandBufferStub::PutChanged() {
   scheduler_->PutChanged();
 }
 
+#ifndef DISABLE_MEDIA
 void GpuCommandBufferStub::OnCreateVideoDecoder(
     media::VideoCodecProfile profile,
     int32 decoder_route_id,
@@ -871,6 +876,7 @@ void GpuCommandBufferStub::OnCreateVideoEncoder(
   // encoder is registered as a DestructionObserver of this stub and will
   // self-delete during destruction of this stub.
 }
+#endif
 
 void GpuCommandBufferStub::OnSetSurfaceVisible(bool visible) {
   TRACE_EVENT0("gpu", "GpuCommandBufferStub::OnSetSurfaceVisible");

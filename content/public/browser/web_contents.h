@@ -347,9 +347,11 @@ class WebContents : public PageNavigator,
   virtual void DecrementCapturerCount() = 0;
   virtual int GetCapturerCount() const = 0;
 
+#ifndef DISABLE_MEDIA
   // Indicates/Sets whether all audio output from this WebContents is muted.
   virtual bool IsAudioMuted() const = 0;
   virtual void SetAudioMuted(bool mute) = 0;
+#endif
 
   // Indicates whether this tab should be considered crashed. The setter will
   // also notify the delegate when the flag is changed.
@@ -673,12 +675,14 @@ class WebContents : public PageNavigator,
   virtual void ResumeLoadingCreatedWebContents() = 0;
 
 #if defined(OS_ANDROID)
+#ifndef DISABLE_MEDIA
   // Requests to resume the current media session.
   virtual void ResumeMediaSession() = 0;
   // Requests to suspend the current media session.
   virtual void SuspendMediaSession() = 0;
   // Requests to stop the current media session.
   virtual void StopMediaSession() = 0;
+#endif
 
   CONTENT_EXPORT static WebContents* FromJavaWebContents(
       jobject jweb_contents_android);

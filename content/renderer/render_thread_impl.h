@@ -65,10 +65,12 @@ namespace IPC {
 class MessageFilter;
 }
 
+#ifndef DISABLE_MEDIA
 namespace media {
 class AudioHardwareConfig;
 class GpuVideoAcceleratorFactories;
 }
+#endif
 
 namespace scheduler {
 class RendererScheduler;
@@ -81,10 +83,12 @@ class Extension;
 namespace content {
 
 class AppCacheDispatcher;
+#ifndef DISABLE_MEDIA
 class AecDumpMessageFilter;
 class AudioInputMessageFilter;
 class AudioMessageFilter;
 class AudioRendererMixerManager;
+#endif
 class BluetoothMessageFilter;
 class BrowserPluginManager;
 class CacheStorageDispatcher;
@@ -107,11 +111,15 @@ class PeerConnectionTracker;
 class RasterWorkerPool;
 class RenderProcessObserver;
 class RendererBlinkPlatformImpl;
+#ifndef DISABLE_MEDIA
 class RendererDemuxerAndroid;
+#endif
 class ResourceDispatchThrottler;
 class ResourceSchedulingFilter;
 class V8SamplingProfiler;
+#ifndef DISABLE_MEDIA
 class VideoCaptureImplManager;
+#endif
 class WebGraphicsContext3DCommandBufferImpl;
 class WebRTCIdentityService;
 
@@ -264,6 +272,7 @@ class CONTENT_EXPORT RenderThreadImpl
     return embedded_worker_dispatcher_.get();
   }
 
+#ifndef DISABLE_MEDIA
   AudioInputMessageFilter* audio_input_message_filter() {
     return audio_input_message_filter_.get();
   }
@@ -281,6 +290,7 @@ class CONTENT_EXPORT RenderThreadImpl
     return renderer_demuxer_.get();
   }
 #endif
+#endif  // ifndef DISABLE_MEDIA
 
   // Creates the embedder implementation of WebMediaStreamCenter.
   // The resulting object is owned by WebKit and deleted by WebKit at tear-down.
@@ -305,9 +315,11 @@ class CONTENT_EXPORT RenderThreadImpl
   }
 #endif
 
+#ifndef DISABLE_MEDIA
   VideoCaptureImplManager* video_capture_impl_manager() const {
     return vc_manager_.get();
   }
+#endif
 
   // Get the GPU channel. Returns NULL if the channel is not established or
   // has been lost.
@@ -331,11 +343,14 @@ class CONTENT_EXPORT RenderThreadImpl
   // not sent for at least one notification delay.
   void PostponeIdleNotification();
 
+#ifndef DISABLE_MEDIA
   scoped_refptr<media::GpuVideoAcceleratorFactories> GetGpuFactories();
+#endif
 
   scoped_refptr<cc_blink::ContextProviderWebContext>
   SharedMainThreadContextProvider();
 
+#ifndef DISABLE_MEDIA
   // AudioRendererMixerManager instance which manages renderer side mixer
   // instances shared based on configured audio parameters.  Lazily created on
   // first call.
@@ -345,6 +360,7 @@ class CONTENT_EXPORT RenderThreadImpl
   // renderer side clients.  Creation requires a synchronous IPC call so it is
   // lazily created on the first call.
   media::AudioHardwareConfig* GetAudioHardwareConfig();
+#endif
 
 #if defined(OS_WIN)
   void PreCacheFontCharacters(const LOGFONT& log_font,
@@ -496,12 +512,14 @@ class CONTENT_EXPORT RenderThreadImpl
 
   // Used on the renderer and IPC threads.
   scoped_refptr<DBMessageFilter> db_message_filter_;
+#ifndef DISABLE_MEDIA
   scoped_refptr<AudioInputMessageFilter> audio_input_message_filter_;
   scoped_refptr<AudioMessageFilter> audio_message_filter_;
   scoped_refptr<MidiMessageFilter> midi_message_filter_;
 #if defined(OS_ANDROID)
   scoped_refptr<RendererDemuxerAndroid> renderer_demuxer_;
 #endif
+#endif  // ifndef DISABLE_MEDIA
   scoped_refptr<DevToolsAgentFilter> devtools_agent_message_filter_;
   scoped_ptr<V8SamplingProfiler> v8_sampling_profiler_;
 
@@ -518,6 +536,7 @@ class CONTENT_EXPORT RenderThreadImpl
   scoped_refptr<P2PSocketDispatcher> p2p_socket_dispatcher_;
 #endif
 
+#ifndef DISABLE_MEDIA
   // Used on the render thread.
   scoped_ptr<VideoCaptureImplManager> vc_manager_;
 
@@ -526,6 +545,7 @@ class CONTENT_EXPORT RenderThreadImpl
   // diagnostic audio data for WebRTC stored locally when enabled by the user in
   // chrome://webrtc-internals.
   scoped_refptr<AecDumpMessageFilter> aec_dump_message_filter_;
+#endif
 
   // The count of RenderWidgets running through this thread.
   int widget_count_;
@@ -592,8 +612,10 @@ class CONTENT_EXPORT RenderThreadImpl
 
   scoped_refptr<ContextProviderCommandBuffer> gpu_va_context_provider_;
 
+#ifndef DISABLE_MEDIA
   scoped_ptr<AudioRendererMixerManager> audio_renderer_mixer_manager_;
   scoped_ptr<media::AudioHardwareConfig> audio_hardware_config_;
+#endif
 
   HistogramCustomizer histogram_customizer_;
 
