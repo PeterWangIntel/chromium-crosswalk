@@ -25,6 +25,10 @@
       'WebSpeechRecognitionHandle.cpp',
       'WebSpeechRecognitionResult.cpp',
     ],
+    'web_files_midi': [
+      'MIDIClientProxy.cpp',
+      'MIDIClientProxy.h',
+    ],
     'web_files': [
       'AssertMatchingEnums.cpp',
       'AssociatedURLLoader.cpp',

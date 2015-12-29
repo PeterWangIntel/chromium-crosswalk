@@ -550,7 +550,9 @@ class CONTENT_EXPORT RenderFrameImpl
 #ifndef DISABLE_MEDIA
   virtual blink::WebUserMediaClient* userMediaClient();
   virtual blink::WebEncryptedMediaClient* encryptedMediaClient();
+#ifndef DISABLE_WEBMIDI
   virtual blink::WebMIDIClient* webMIDIClient();
+#endif
 #endif
   virtual bool willCheckAndDispatchMessageEvent(
       blink::WebLocalFrame* source_frame,
@@ -999,8 +1001,10 @@ class CONTENT_EXPORT RenderFrameImpl
 #endif
 #endif  // ifndef DISABLE_MEDIA
 
+#ifndef DISABLE_WEBMIDI
   // MidiClient attached to this frame; lazily initialized.
   MidiDispatcher* midi_dispatcher_;
+#endif
 
 #ifndef DISABLE_MEDIA
 #if defined(OS_ANDROID)

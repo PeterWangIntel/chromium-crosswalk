@@ -281,9 +281,11 @@ class CONTENT_EXPORT RenderThreadImpl
     return audio_message_filter_.get();
   }
 
+#ifndef DISABLE_WEBMIDI
   MidiMessageFilter* midi_message_filter() {
     return midi_message_filter_.get();
   }
+#endif
 
 #if defined(OS_ANDROID)
   RendererDemuxerAndroid* renderer_demuxer() {
@@ -515,7 +517,9 @@ class CONTENT_EXPORT RenderThreadImpl
 #ifndef DISABLE_MEDIA
   scoped_refptr<AudioInputMessageFilter> audio_input_message_filter_;
   scoped_refptr<AudioMessageFilter> audio_message_filter_;
+#ifndef DISABLE_WEBMIDI
   scoped_refptr<MidiMessageFilter> midi_message_filter_;
+#endif
 #if defined(OS_ANDROID)
   scoped_refptr<RendererDemuxerAndroid> renderer_demuxer_;
 #endif

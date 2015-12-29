@@ -67,7 +67,9 @@
 #include "media/audio/audio_manager.h"
 #include "media/base/media.h"
 #include "media/base/user_input_monitor.h"
+#ifndef DISABLE_WEBMIDI
 #include "media/midi/midi_manager.h"
+#endif
 #endif
 #include "net/base/network_change_notifier.h"
 #include "net/socket/client_socket_factory.h"
@@ -1165,10 +1167,12 @@ int BrowserMainLoop::BrowserThreadsStarted() {
         MediaInternals::GetInstance(), io_thread_->task_runner()));
   }
 
+#ifndef DISABLE_WEBMIDI
   {
     TRACE_EVENT0("startup", "BrowserThreadsStarted::Subsystem:MidiManager");
     midi_manager_.reset(media::midi::MidiManager::Create());
   }
+#endif
 #endif
 
 #if defined(OS_LINUX) && defined(USE_UDEV)

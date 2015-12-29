@@ -56,7 +56,9 @@
 #ifndef DISABLE_MEDIA
 #include "content/renderer/media/audio_decoder.h"
 #include "content/renderer/media/renderer_webaudiodevice_impl.h"
+#ifndef DISABLE_WEBMIDI
 #include "content/renderer/media/renderer_webmidiaccessor_impl.h"
+#endif
 #endif
 #include "content/renderer/render_thread_impl.h"
 #include "content/renderer/renderer_clipboard_delegate.h"
@@ -786,6 +788,7 @@ bool RendererBlinkPlatformImpl::loadAudioResource(
 
 //------------------------------------------------------------------------------
 
+#ifndef DISABLE_WEBMIDI
 blink::WebMIDIAccessor* RendererBlinkPlatformImpl::createMIDIAccessor(
     blink::WebMIDIAccessorClient* client) {
   blink::WebMIDIAccessor* accessor =
@@ -795,6 +798,7 @@ blink::WebMIDIAccessor* RendererBlinkPlatformImpl::createMIDIAccessor(
 
   return new RendererWebMIDIAccessorImpl(client);
 }
+#endif
 #endif  // ifndef DISABLE_MEDIA
 
 void RendererBlinkPlatformImpl::getPluginList(

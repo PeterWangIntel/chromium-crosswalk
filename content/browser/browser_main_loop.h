@@ -31,9 +31,11 @@ class TraceEventSystemStatsMonitor;
 namespace media {
 class AudioManager;
 class UserInputMonitor;
+#ifndef DISABLE_WEBMIDI
 namespace midi {
 class MidiManager;
 }  // namespace midi
+#endif
 }  // namespace media
 #endif  // ifndef DISABLE_MEDIA
 
@@ -118,7 +120,9 @@ class CONTENT_EXPORT BrowserMainLoop {
   media::UserInputMonitor* user_input_monitor() const {
     return user_input_monitor_.get();
   }
+#ifndef DISABLE_WEBMIDI
   media::midi::MidiManager* midi_manager() const { return midi_manager_.get(); }
+#endif
 #endif
   base::Thread* indexed_db_thread() const { return indexed_db_thread_.get(); }
 
@@ -251,7 +255,9 @@ class CONTENT_EXPORT BrowserMainLoop {
   scoped_ptr<media::UserInputMonitor> user_input_monitor_;
   scoped_ptr<media::AudioManager> audio_manager_;
 
+#ifndef DISABLE_WEBMIDI
   scoped_ptr<media::midi::MidiManager> midi_manager_;
+#endif
 #endif
 
 #if defined(USE_UDEV)

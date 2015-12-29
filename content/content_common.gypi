@@ -223,6 +223,9 @@
       'common/gpu/client/gpu_video_encode_accelerator_host.cc',
       'common/gpu/client/gpu_video_encode_accelerator_host.h',
     ],
+    'private_common_sources_midi': [
+      'common/media/midi_messages.h',
+    ],
     'private_common_sources': [
       'common/accessibility_messages.h',
       'common/all_messages.h',
@@ -1217,6 +1220,14 @@
     ['disable_media==1', {
       'sources!': [
         '<@(private_common_sources_media)',
+      ],
+    }],
+    ['disable_webmidi==1', {
+      'sources!': [
+        '<@(private_common_sources_midi)',
+      ],
+      'dependencies!': [
+        '../media/midi/midi.gyp:midi',
       ],
     }],
   ],

@@ -232,6 +232,11 @@
                     '<@(web_files_speech)',
                   ],
                 }],
+                ['disable_webmidi==1', {
+                  'sources!': [
+                    '<@(web_files_midi)',
+                  ],
+                }],
             ],
             'direct_dependent_settings': {
                 'include_dirs': [

@@ -114,6 +114,15 @@
       'renderer/notification_permission_dispatcher.cc',
       'renderer/notification_permission_dispatcher.h',
     ],
+    'private_renderer_sources_midi': [
+      'renderer/media/midi_dispatcher.cc',
+      'renderer/media/midi_dispatcher.h',
+      'renderer/media/midi_message_filter.cc',
+      'renderer/media/midi_message_filter.h',
+
+      'renderer/media/renderer_webmidiaccessor_impl.cc',
+      'renderer/media/renderer_webmidiaccessor_impl.h',
+    ],
     'private_renderer_sources': [
       'renderer/accessibility/blink_ax_enum_conversion.cc',
       'renderer/accessibility/blink_ax_enum_conversion.h',
@@ -1041,6 +1050,11 @@
         '../media/blink/media_blink.gyp:media_blink',
         '../media/media.gyp:media',
       ],
+    }],
+    ['disable_webmidi==1', {
+      'sources!': [
+        '<@(private_renderer_sources_midi)',
+      ]
     }],
   ],
   'target_conditions': [

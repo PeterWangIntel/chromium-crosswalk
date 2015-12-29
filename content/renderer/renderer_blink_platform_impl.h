@@ -126,8 +126,10 @@ class CONTENT_EXPORT RendererBlinkPlatformImpl : public BlinkPlatformImpl {
       blink::WebAudioBus* destination_bus, const char* audio_file_data,
       size_t data_size);
 
+#ifndef DISABLE_WEBMIDI
   virtual blink::WebMIDIAccessor*
       createMIDIAccessor(blink::WebMIDIAccessorClient* client);
+#endif
 #endif
 
   virtual blink::WebBlobRegistry* blobRegistry();
