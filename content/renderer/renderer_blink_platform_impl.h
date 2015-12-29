@@ -109,11 +109,14 @@ class CONTENT_EXPORT RendererBlinkPlatformImpl : public BlinkPlatformImpl {
   virtual bool canAccelerate2dCanvas();
   virtual bool isThreadedCompositingEnabled();
   virtual bool isThreadedAnimationEnabled();
+#ifndef DISABLE_MEDIA
   virtual double audioHardwareSampleRate();
   virtual size_t audioHardwareBufferSize();
   virtual unsigned audioHardwareOutputChannels();
+#endif
   virtual blink::WebDatabaseObserver* databaseObserver();
 
+#ifndef DISABLE_MEDIA
   virtual blink::WebAudioDevice* createAudioDevice(
       size_t buffer_size, unsigned input_channels, unsigned channels,
       double sample_rate, blink::WebAudioDevice::RenderCallback* callback,
@@ -125,6 +128,7 @@ class CONTENT_EXPORT RendererBlinkPlatformImpl : public BlinkPlatformImpl {
 
   virtual blink::WebMIDIAccessor*
       createMIDIAccessor(blink::WebMIDIAccessorClient* client);
+#endif
 
   virtual blink::WebBlobRegistry* blobRegistry();
   virtual void sampleGamepads(blink::WebGamepads&);

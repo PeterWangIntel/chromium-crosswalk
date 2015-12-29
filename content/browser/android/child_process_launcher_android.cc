@@ -9,8 +9,10 @@
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
 #include "content/browser/frame_host/render_frame_host_impl.h"
+#ifndef DISABLE_MEDIA
 #include "content/browser/media/android/browser_media_player_manager.h"
 #include "content/browser/media/media_web_contents_observer.h"
+#endif
 #include "content/browser/renderer_host/compositor_impl_android.h"
 #include "content/browser/web_contents/web_contents_impl.h"
 #include "content/public/browser/browser_thread.h"
@@ -52,6 +54,7 @@ static void SetSurfacePeer(
     return;
   }
 
+#ifndef DISABLE_MEDIA
   RenderFrameHostImpl* frame =
       RenderFrameHostImpl::FromID(render_process_id, render_frame_id);
   if (!frame) {
@@ -78,6 +81,7 @@ static void SetSurfacePeer(
     gfx::ScopedJavaSurface scoped_surface(surface);
     player->SetVideoSurface(scoped_surface.Pass());
   }
+#endif  // ifndef DISABLE_MEDIA
 }
 
 }  // anonymous namespace

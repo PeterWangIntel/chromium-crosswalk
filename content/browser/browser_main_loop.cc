@@ -40,7 +40,9 @@
 #include "content/browser/gpu/gpu_process_host_ui_shim.h"
 #include "content/browser/histogram_synchronizer.h"
 #include "content/browser/loader/resource_dispatcher_host_impl.h"
+#ifndef DISABLE_MEDIA
 #include "content/browser/media/media_internals.h"
+#endif
 #include "content/browser/mojo/mojo_shell_context.h"
 #include "content/browser/net/browser_online_state_observer.h"
 #include "content/browser/renderer_host/media/media_stream_manager.h"
@@ -61,10 +63,12 @@
 #include "content/public/common/result_codes.h"
 #include "crypto/nss_util.h"
 #include "device/battery/battery_status_service.h"
+#ifndef DISABLE_MEDIA
 #include "media/audio/audio_manager.h"
 #include "media/base/media.h"
 #include "media/base/user_input_monitor.h"
 #include "media/midi/midi_manager.h"
+#endif
 #include "net/base/network_change_notifier.h"
 #include "net/socket/client_socket_factory.h"
 #include "net/ssl/ssl_config_service.h"
@@ -544,10 +548,12 @@ void BrowserMainLoop::PostMainMessageLoopStart() {
   }
 
 #if !defined(OS_IOS)
+#ifndef DISABLE_MEDIA
   {
     TRACE_EVENT0("startup", "BrowserMainLoop::Subsystem:MediaFeatures");
     media::InitializeMediaLibrary();
   }
+#endif
   {
     TRACE_EVENT0("startup",
                  "BrowserMainLoop::Subsystem:ContentWebUIController");
@@ -1152,6 +1158,7 @@ int BrowserMainLoop::BrowserThreadsStarted() {
   base::trace_event::MemoryDumpManager::GetInstance()->RegisterDumpProvider(
       BrowserGpuMemoryBufferManager::current(), io_thread_->task_runner());
 
+#ifndef DISABLE_MEDIA
   {
     TRACE_EVENT0("startup", "BrowserThreadsStarted::Subsystem:AudioMan");
     audio_manager_.reset(media::AudioManager::CreateWithHangTimer(
@@ -1162,6 +1169,7 @@ int BrowserMainLoop::BrowserThreadsStarted() {
     TRACE_EVENT0("startup", "BrowserThreadsStarted::Subsystem:MidiManager");
     midi_manager_.reset(media::midi::MidiManager::Create());
   }
+#endif
 
 #if defined(OS_LINUX) && defined(USE_UDEV)
   device_monitor_linux_.reset(new DeviceMonitorLinux());
@@ -1180,6 +1188,7 @@ int BrowserMainLoop::BrowserThreadsStarted() {
     resource_dispatcher_host_.reset(new ResourceDispatcherHostImpl());
   }
 
+#ifndef DISABLE_MEDIA
   // MediaStreamManager needs the IO thread to be created.
   {
     TRACE_EVENT0("startup",
@@ -1203,6 +1212,7 @@ int BrowserMainLoop::BrowserThreadsStarted() {
     user_input_monitor_ = media::UserInputMonitor::Create(
         io_thread_->task_runner(), main_thread_->task_runner());
   }
+#endif  // ifndef DISABLE_MEDIA
 
   {
     TRACE_EVENT0("startup",

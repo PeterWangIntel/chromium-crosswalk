@@ -189,6 +189,40 @@
 
       'common/speech_recognition_messages.h',
     ],
+    'private_common_sources_media': [
+      'common/gpu/media/fake_video_decode_accelerator.cc',
+      'common/gpu/media/fake_video_decode_accelerator.h',
+      'common/gpu/media/gpu_jpeg_decode_accelerator.cc',
+      'common/gpu/media/gpu_jpeg_decode_accelerator.h',
+      'common/gpu/media/gpu_video_accelerator_util.cc',
+      'common/gpu/media/gpu_video_accelerator_util.h',
+      'common/gpu/media/gpu_video_decode_accelerator.cc',
+      'common/gpu/media/gpu_video_decode_accelerator.h',
+      'common/gpu/media/gpu_video_encode_accelerator.cc',
+      'common/gpu/media/gpu_video_encode_accelerator.h',
+
+      'common/media/aec_dump_messages.h',
+      'common/media/audio_messages.h',
+      'common/media/cdm_messages.h',
+      'common/media/cdm_messages_enums.h',
+      'common/media/media_param_traits.cc',
+      'common/media/media_param_traits.h',
+      'common/media/media_player_messages_android.h',
+      'common/media/media_player_messages_enums_android.h',
+      'common/media/media_stream_messages.h',
+      'common/media/media_stream_options.cc',
+      'common/media/media_stream_options.h',
+      'common/media/media_stream_track_metrics_host_messages.h',
+      'common/media/midi_messages.h',
+      'common/media/video_capture.h',
+      'common/media/video_capture_messages.h',
+      'common/media/webrtc_identity_messages.h',
+
+      'common/gpu/client/gpu_video_decode_accelerator_host.cc',
+      'common/gpu/client/gpu_video_decode_accelerator_host.h',
+      'common/gpu/client/gpu_video_encode_accelerator_host.cc',
+      'common/gpu/client/gpu_video_encode_accelerator_host.h',
+    ],
     'private_common_sources': [
       'common/accessibility_messages.h',
       'common/all_messages.h',
@@ -1178,6 +1212,11 @@
     ['enable_web_speech==0', {
       'sources!': [
         '<@(private_common_sources_speech)',
+      ],
+    }],
+    ['disable_media==1', {
+      'sources!': [
+        '<@(private_common_sources_media)',
       ],
     }],
   ],

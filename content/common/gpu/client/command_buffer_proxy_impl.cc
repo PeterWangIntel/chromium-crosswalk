@@ -559,6 +559,7 @@ bool CommandBufferProxyImpl::ProduceFrontBuffer(const gpu::Mailbox& mailbox) {
   return Send(new GpuCommandBufferMsg_ProduceFrontBuffer(route_id_, mailbox));
 }
 
+#ifndef DISABLE_MEDIA
 scoped_ptr<media::VideoDecodeAccelerator>
 CommandBufferProxyImpl::CreateVideoDecoder() {
   if (!channel_)
@@ -574,6 +575,7 @@ CommandBufferProxyImpl::CreateVideoEncoder() {
   return scoped_ptr<media::VideoEncodeAccelerator>(
       new GpuVideoEncodeAcceleratorHost(channel_, this));
 }
+#endif
 
 gpu::error::Error CommandBufferProxyImpl::GetLastError() {
   return last_state_.error;

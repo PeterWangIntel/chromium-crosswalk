@@ -247,6 +247,7 @@ void PepperMediaDeviceManager::NotifyDeviceOpened(int request_id,
   callback.Run(request_id, succeeded, label);
 }
 
+#ifndef DISABLE_MEDIA
 MediaStreamDispatcher* PepperMediaDeviceManager::GetMediaStreamDispatcher()
     const {
   DCHECK(render_frame());
@@ -255,5 +256,6 @@ MediaStreamDispatcher* PepperMediaDeviceManager::GetMediaStreamDispatcher()
   DCHECK(dispatcher);
   return dispatcher;
 }
+#endif
 
 }  // namespace content

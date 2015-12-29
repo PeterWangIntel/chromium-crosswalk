@@ -25,8 +25,10 @@
 #include "content/public/browser/browser_message_filter.h"
 #include "content/public/common/three_d_api_types.h"
 #include "ipc/message_filter.h"
+#ifndef DISABLE_MEDIA
 #include "media/audio/audio_parameters.h"
 #include "media/base/channel_layout.h"
+#endif
 #include "net/cookies/canonical_cookie.h"
 #include "third_party/WebKit/public/web/WebPopupType.h"
 #include "ui/gfx/geometry/rect.h"
@@ -213,8 +215,10 @@ class CONTENT_EXPORT RenderMessageFilter : public BrowserMessageFilter {
                      const base::string16& suggested_name);
   void OnSaveImageFromDataURL(int render_view_id, const std::string& url_str);
 
+#ifndef DISABLE_MEDIA
   void OnGetAudioHardwareConfig(media::AudioParameters* input_params,
                                 media::AudioParameters* output_params);
+#endif
 
 #if defined(OS_WIN)
   // Used to look up the monitor color profile.
@@ -259,7 +263,9 @@ class CONTENT_EXPORT RenderMessageFilter : public BrowserMessageFilter {
                                 scoped_ptr<net::KeygenHandler> keygen_handler);
   void OnKeygenOnWorkerThread(scoped_ptr<net::KeygenHandler> keygen_handler,
                               IPC::Message* reply_msg);
+#ifndef DISABLE_MEDIA
   void OnMediaLogEvents(const std::vector<media::MediaLogEvent>&);
+#endif
 
   // Check the policy for getting cookies. Gets the cookies if allowed.
   void CheckPolicyForCookies(int render_frame_id,
@@ -286,10 +292,12 @@ class CONTENT_EXPORT RenderMessageFilter : public BrowserMessageFilter {
                           ThreeDAPIType context_type,
                           int arb_robustness_status_code);
 
+#ifndef DISABLE_MEDIA
 #if defined(OS_ANDROID)
   void OnWebAudioMediaCodec(base::SharedMemoryHandle encoded_data_handle,
                             base::FileDescriptor pcm_output,
                             uint32_t data_size);
+#endif
 #endif
 
   void OnAllocateGpuMemoryBuffer(gfx::GpuMemoryBufferId id,
@@ -333,8 +341,10 @@ class CONTENT_EXPORT RenderMessageFilter : public BrowserMessageFilter {
 
   std::set<OpenChannelToNpapiPluginCallback*> plugin_host_clients_;
 
+#ifndef DISABLE_MEDIA
   media::AudioManager* audio_manager_;
   MediaInternals* media_internals_;
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(RenderMessageFilter);
 };

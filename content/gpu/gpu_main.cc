@@ -25,9 +25,11 @@
 #include "content/common/gpu/gpu_config.h"
 #include "content/common/gpu/gpu_memory_buffer_factory.h"
 #include "content/common/gpu/gpu_messages.h"
+#ifndef DISABLE_MEDIA
 #include "content/common/gpu/media/gpu_jpeg_decode_accelerator.h"
 #include "content/common/gpu/media/gpu_video_decode_accelerator.h"
 #include "content/common/gpu/media/gpu_video_encode_accelerator.h"
+#endif
 #include "content/common/sandbox_linux/sandbox_linux.h"
 #include "content/gpu/gpu_child_thread.h"
 #include "content/gpu/gpu_process.h"
@@ -345,12 +347,14 @@ int GpuMain(const MainFunctionParams& parameters) {
     gpu_info.sandboxed = Sandbox::SandboxIsCurrentlyActive();
 #endif
 
+#ifndef DISABLE_MEDIA
     gpu_info.video_decode_accelerator_supported_profiles =
         content::GpuVideoDecodeAccelerator::GetSupportedProfiles();
     gpu_info.video_encode_accelerator_supported_profiles =
         content::GpuVideoEncodeAccelerator::GetSupportedProfiles();
     gpu_info.jpeg_decode_accelerator_supported =
         content::GpuJpegDecodeAccelerator::IsSupported();
+#endif
   } else {
     dead_on_arrival = true;
   }

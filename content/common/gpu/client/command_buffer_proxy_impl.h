@@ -34,10 +34,12 @@ namespace gpu {
 struct Mailbox;
 }
 
+#ifndef DISABLE_MEDIA
 namespace media {
 class VideoDecodeAccelerator;
 class VideoEncodeAccelerator;
 }
+#endif
 
 namespace content {
 class GpuChannelHost;
@@ -67,6 +69,7 @@ class CommandBufferProxyImpl
                          int32 stream_id);
   ~CommandBufferProxyImpl() override;
 
+#ifndef DISABLE_MEDIA
   // Sends an IPC message to create a GpuVideoDecodeAccelerator. Creates and
   // returns it as an owned pointer to a media::VideoDecodeAccelerator.  Returns
   // NULL on failure to create the GpuVideoDecodeAcceleratorHost.
@@ -82,6 +85,7 @@ class CommandBufferProxyImpl
   // the GPU process, even if this returns non-NULL. In this case the VEA client
   // is notified of an error later, after Initialize();
   scoped_ptr<media::VideoEncodeAccelerator> CreateVideoEncoder();
+#endif
 
   // IPC::Listener implementation:
   bool OnMessageReceived(const IPC::Message& message) override;

@@ -24,7 +24,9 @@
 #include "content/browser/gpu/browser_gpu_memory_buffer_manager.h"
 #include "content/browser/gpu/gpu_data_manager_impl.h"
 #include "content/browser/loader/resource_dispatcher_host_impl.h"
+#ifndef DISABLE_MEDIA
 #include "content/browser/media/media_internals.h"
+#endif
 #include "content/browser/plugin_process_host.h"
 #include "content/browser/renderer_host/pepper/pepper_security_helper.h"
 #include "content/browser/renderer_host/render_process_host_impl.h"
@@ -53,10 +55,12 @@
 #include "content/public/common/webplugininfo.h"
 #include "ipc/ipc_channel_handle.h"
 #include "ipc/ipc_platform_file.h"
+#ifndef DISABLE_MEDIA
 #include "media/audio/audio_manager.h"
 #include "media/audio/audio_manager_base.h"
 #include "media/audio/audio_parameters.h"
 #include "media/base/media_log_event.h"
+#endif
 #include "net/base/io_buffer.h"
 #include "net/base/keygen_handler.h"
 #include "net/base/mime_util.h"
@@ -84,7 +88,9 @@
 #include "content/common/sandbox_win.h"
 #endif
 #if defined(OS_ANDROID)
+#ifndef DISABLE_MEDIA
 #include "media/base/android/webaudio_media_codec_bridge.h"
+#endif
 #endif
 
 #if defined(ENABLE_PLUGINS)
@@ -314,9 +320,13 @@ RenderMessageFilter::RenderMessageFilter(
       render_widget_helper_(render_widget_helper),
       incognito_(browser_context->IsOffTheRecord()),
       dom_storage_context_(dom_storage_context),
+#ifndef DISABLE_MEDIA
       render_process_id_(render_process_id),
       audio_manager_(audio_manager),
       media_internals_(media_internals) {
+#else
+      render_process_id_(render_process_id) {
+#endif
   DCHECK(request_context_.get());
 
   if (render_widget_helper)
@@ -423,17 +433,23 @@ bool RenderMessageFilter::OnMessageReceived(const IPC::Message& message) {
     IPC_MESSAGE_HANDLER(ViewHostMsg_DidGenerateCacheableMetadata,
                         OnCacheableMetadataAvailable)
     IPC_MESSAGE_HANDLER_DELAY_REPLY(ViewHostMsg_Keygen, OnKeygen)
+#ifndef DISABLE_MEDIA
     IPC_MESSAGE_HANDLER(ViewHostMsg_GetAudioHardwareConfig,
                         OnGetAudioHardwareConfig)
+#endif
 #if defined(OS_WIN)
     IPC_MESSAGE_HANDLER(ViewHostMsg_GetMonitorColorProfile,
                         OnGetMonitorColorProfile)
 #endif
+#ifndef DISABLE_MEDIA
     IPC_MESSAGE_HANDLER(ViewHostMsg_MediaLogEvents, OnMediaLogEvents)
+#endif
     IPC_MESSAGE_HANDLER(ViewHostMsg_Are3DAPIsBlocked, OnAre3DAPIsBlocked)
     IPC_MESSAGE_HANDLER(ViewHostMsg_DidLose3DContext, OnDidLose3DContext)
+#ifndef DISABLE_MEDIA
 #if defined(OS_ANDROID)
     IPC_MESSAGE_HANDLER(ViewHostMsg_RunWebAudioMediaCodec, OnWebAudioMediaCodec)
+#endif
 #endif
     IPC_MESSAGE_UNHANDLED(handled = false)
   IPC_END_MESSAGE_MAP()
@@ -458,9 +474,11 @@ base::TaskRunner* RenderMessageFilter::OverrideTaskRunnerForMessage(
   if (message.type() == ViewHostMsg_GetMonitorColorProfile::ID)
     return BrowserThread::GetBlockingPool();
 #endif
+#ifndef DISABLE_MEDIA
   // Always query audio device parameters on the audio thread.
   if (message.type() == ViewHostMsg_GetAudioHardwareConfig::ID)
     return audio_manager_->GetTaskRunner().get();
+#endif
   return NULL;
 }
 
@@ -795,6 +813,7 @@ void RenderMessageFilter::OnGenerateRoutingID(int* route_id) {
   *route_id = render_widget_helper_->GetNextRoutingID();
 }
 
+#ifndef DISABLE_MEDIA
 void RenderMessageFilter::OnGetAudioHardwareConfig(
     media::AudioParameters* input_params,
     media::AudioParameters* output_params) {
@@ -806,6 +825,7 @@ void RenderMessageFilter::OnGetAudioHardwareConfig(
   *input_params = audio_manager_->GetInputStreamParameters(
       media::AudioManagerBase::kDefaultDeviceId);
 }
+#endif
 
 #if defined(OS_WIN)
 void RenderMessageFilter::OnGetMonitorColorProfile(std::vector<char>* profile) {
@@ -1049,6 +1069,7 @@ void RenderMessageFilter::OnKeygenOnWorkerThread(
   Send(reply_msg);
 }
 
+#ifndef DISABLE_MEDIA
 void RenderMessageFilter::OnMediaLogEvents(
     const std::vector<media::MediaLogEvent>& events) {
   // OnMediaLogEvents() is always dispatched to the UI thread for handling.
@@ -1057,6 +1078,7 @@ void RenderMessageFilter::OnMediaLogEvents(
   if (media_internals_)
     media_internals_->OnMediaEvents(render_process_id_, events);
 }
+#endif
 
 void RenderMessageFilter::CheckPolicyForCookies(
     int render_frame_id,
@@ -1173,6 +1195,7 @@ void RenderMessageFilter::OnPreCacheFontCharacters(const LOGFONT& font,
 }
 #endif
 
+#ifndef DISABLE_MEDIA
 #if defined(OS_ANDROID)
 void RenderMessageFilter::OnWebAudioMediaCodec(
     base::SharedMemoryHandle encoded_data_handle,
@@ -1187,6 +1210,7 @@ void RenderMessageFilter::OnWebAudioMediaCodec(
                  encoded_data_handle, pcm_output, data_size),
       true);
 }
+#endif
 #endif
 
 void RenderMessageFilter::OnAllocateGpuMemoryBuffer(gfx::GpuMemoryBufferId id,

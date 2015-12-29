@@ -78,11 +78,13 @@ base::android::RegistrationMethod kContentRegisteredMethods[] = {
      content::InterstitialPageDelegateAndroid::
          RegisterInterstitialPageDelegateAndroid},
     {"LoadUrlParams", content::RegisterLoadUrlParams},
+#ifndef DISABLE_MEDIA
     {"MediaDrmCredentialManager",
      content::MediaDrmCredentialManager::RegisterMediaDrmCredentialManager},
     {"MediaResourceGetterImpl",
      content::MediaResourceGetterImpl::RegisterMediaResourceGetter},
     {"MediaSession", content::MediaSession::RegisterMediaSession},
+#endif
     {"MotionEventAndroid",
      content::MotionEventAndroid::RegisterMotionEventAndroid},
     {"MotionEventSynthesizer",

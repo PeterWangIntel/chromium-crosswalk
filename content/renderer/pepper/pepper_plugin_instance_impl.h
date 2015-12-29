@@ -401,6 +401,7 @@ class CONTENT_EXPORT PepperPluginInstanceImpl
                        PP_Var* exception) override;
   uint32_t GetAudioHardwareOutputSampleRate(PP_Instance instance) override;
   uint32_t GetAudioHardwareOutputBufferSize(PP_Instance instance) override;
+
   PP_Var GetDefaultCharSet(PP_Instance instance) override;
   void SetPluginToHandleFindRequests(PP_Instance) override;
   void NumberOfFindResultsChanged(PP_Instance instance,

@@ -61,7 +61,11 @@ PP_Resource ResourceCreationImpl::CreateAudioConfig(
 }
 
 PP_Resource ResourceCreationImpl::CreateAudioTrusted(PP_Instance instance) {
+#ifndef DISABLE_MEDIA
   return (new PPB_Audio_Impl(instance))->GetReference();
+#else
+  return 0;
+#endif
 }
 
 PP_Resource ResourceCreationImpl::CreateAudioInput(PP_Instance instance) {
@@ -326,7 +330,11 @@ PP_Resource ResourceCreationImpl::CreateVideoDecoderDev(
     PP_Instance instance,
     PP_Resource graphics3d_id,
     PP_VideoDecoder_Profile profile) {
+#ifndef DISABLE_MEDIA
   return PPB_VideoDecoder_Impl::Create(instance, graphics3d_id, profile);
+#else
+  return 0;
+#endif
 }
 
 PP_Resource ResourceCreationImpl::CreateVideoDestination(PP_Instance instance) {

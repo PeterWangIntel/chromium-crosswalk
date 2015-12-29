@@ -8,7 +8,9 @@
 #include "content/browser/appcache/appcache_internals_ui.h"
 #include "content/browser/gpu/gpu_internals_ui.h"
 #include "content/browser/indexed_db/indexed_db_internals_ui.h"
+#ifndef DISABLE_MEDIA
 #include "content/browser/media/media_internals_ui.h"
+#endif
 #include "content/browser/service_worker/service_worker_internals_ui.h"
 #include "content/browser/tracing/tracing_ui.h"
 #include "content/public/browser/storage_partition.h"
@@ -65,8 +67,10 @@ WebUIController* ContentWebUIControllerFactory::CreateWebUIControllerForURL(
   if (url.host() == kChromeUIIndexedDBInternalsHost)
     return new IndexedDBInternalsUI(web_ui);
 #endif
+#ifndef DISABLE_MEDIA
   if (url.host() == kChromeUIMediaInternalsHost)
     return new MediaInternalsUI(web_ui);
+#endif
 #ifndef DISABLE_ACCESSIBILITY
   if (url.host() == kChromeUIAccessibilityHost)
     return new AccessibilityUI(web_ui);

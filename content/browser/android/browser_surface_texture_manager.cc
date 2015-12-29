@@ -10,7 +10,9 @@
 #include "content/browser/android/child_process_launcher_android.h"
 #include "content/browser/frame_host/render_frame_host_impl.h"
 #include "content/browser/gpu/browser_gpu_channel_host_factory.h"
+#ifndef DISABLE_MEDIA
 #include "content/browser/media/android/browser_media_player_manager.h"
+#endif
 #include "content/public/browser/browser_thread.h"
 #include "ui/gl/android/scoped_java_surface.h"
 #include "ui/gl/android/surface_texture.h"
@@ -66,10 +68,12 @@ void BrowserSurfaceTextureManager::EstablishSurfaceTexturePeer(
   if (!surface_texture.get())
     return;
 
+#ifndef DISABLE_MEDIA
   BrowserThread::PostTask(
       BrowserThread::UI, FROM_HERE,
       base::Bind(&BrowserMediaPlayerManager::SetSurfacePeer, surface_texture,
                  render_process_handle, render_frame_id, player_id));
+#endif
 }
 
 BrowserSurfaceTextureManager::BrowserSurfaceTextureManager() {

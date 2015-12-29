@@ -95,7 +95,9 @@
 #include "modules/accessibility/AXObjectCacheImpl.h"
 #endif
 #include "modules/credentialmanager/CredentialManagerClient.h"
+#ifndef DISABLE_MEDIA
 #include "modules/encryptedmedia/MediaKeysController.h"
+#endif
 #include "modules/storage/StorageNamespaceController.h"
 #include "modules/webgl/WebGLRenderingContext.h"
 #include "platform/ContextMenu.h"
@@ -471,7 +473,9 @@ WebViewImpl::WebViewImpl(WebViewClient* client)
     pageClients.spellCheckerClient = &m_spellCheckerClientImpl;
 
     m_page = adoptPtrWillBeNoop(new Page(pageClients));
+#ifndef DISABLE_MEDIA
     MediaKeysController::provideMediaKeysTo(*m_page, &m_mediaKeysClientImpl);
+#endif
 #ifndef DISABLE_SPEECH
     provideSpeechRecognitionTo(*m_page, SpeechRecognitionClientProxy::create(client ? client->speechRecognizer() : 0));
 #endif
@@ -3380,6 +3384,7 @@ void WebViewImpl::resetScrollAndScaleState(bool immediately)
 void WebViewImpl::performMediaPlayerAction(const WebMediaPlayerAction& action,
                                            const WebPoint& location)
 {
+#ifndef DISABLE_MEDIA
     HitTestResult result = hitTestResultForViewportPos(location);
     RefPtrWillBeRawPtr<Node> node = result.innerNode();
     if (!isHTMLVideoElement(*node) && !isHTMLAudioElement(*node))
@@ -3405,6 +3410,10 @@ void WebViewImpl::performMediaPlayerAction(const WebMediaPlayerAction& action,
     default:
         ASSERT_NOT_REACHED();
     }
+#else
+    (void) action;
+    (void) location;
+#endif
 }
 
 void WebViewImpl::performPluginAction(const WebPluginAction& action,

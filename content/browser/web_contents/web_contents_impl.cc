@@ -49,8 +49,10 @@
 #include "content/browser/host_zoom_map_impl.h"
 #include "content/browser/loader/resource_dispatcher_host_impl.h"
 #include "content/browser/manifest/manifest_manager_host.h"
+#ifndef DISABLE_MEDIA
 #include "content/browser/media/audio_stream_monitor.h"
 #include "content/browser/media/capture/web_contents_audio_muter.h"
+#endif
 #include "content/browser/message_port_message_filter.h"
 #include "content/browser/plugin_content_origin_whitelist.h"
 #include "content/browser/power_save_blocker_impl.h"
@@ -124,8 +126,10 @@
 #if defined(OS_ANDROID)
 #include "content/browser/android/content_video_view.h"
 #include "content/browser/android/date_time_chooser_android.h"
+#ifndef DISABLE_MEDIA
 #include "content/browser/android/media_players_observer.h"
 #include "content/browser/media/android/media_session.h"
+#endif
 #include "content/browser/web_contents/web_contents_android.h"
 #endif
 
@@ -426,10 +430,12 @@ WebContentsImpl::WebContentsImpl(BrowserContext* browser_context)
   media_web_contents_observer_.reset(new MediaWebContentsObserver(this));
 #endif
 
+#ifndef DISABLE_MEDIA
 #if defined(OS_ANDROID)
   audio_state_provider_.reset(new MediaPlayersObserver(this));
 #else
   audio_state_provider_.reset(new AudioStreamMonitor(this));
+#endif
 #endif
 }
 
@@ -634,10 +640,12 @@ bool WebContentsImpl::OnMessageReceived(RenderViewHost* render_view_host,
     IPC_MESSAGE_HANDLER(FrameHostMsg_EndColorChooser, OnEndColorChooser)
     IPC_MESSAGE_HANDLER(FrameHostMsg_SetSelectedColorInColorChooser,
                         OnSetSelectedColorInColorChooser)
+#ifndef DISABLE_MEDIA
     IPC_MESSAGE_HANDLER(FrameHostMsg_MediaPlayingNotification,
                         OnMediaPlayingNotification)
     IPC_MESSAGE_HANDLER(FrameHostMsg_MediaPausedNotification,
                         OnMediaPausedNotification)
+#endif
     IPC_MESSAGE_HANDLER(FrameHostMsg_DidFirstVisuallyNonEmptyPaint,
                         OnFirstVisuallyNonEmptyPaint)
     IPC_MESSAGE_HANDLER(ViewHostMsg_DidLoadResourceFromMemoryCache,
@@ -1118,6 +1126,7 @@ int WebContentsImpl::GetCapturerCount() const {
   return capturer_count_;
 }
 
+#ifndef DISABLE_MEDIA
 bool WebContentsImpl::IsAudioMuted() const {
   return audio_muter_.get() && audio_muter_->is_muting();
 }
@@ -1141,6 +1150,7 @@ void WebContentsImpl::SetAudioMuted(bool mute) {
   // Notification for UI updates in response to the changed muting state.
   NotifyNavigationStateChanged(INVALIDATE_TYPE_TAB);
 }
+#endif
 
 bool WebContentsImpl::IsCrashed() const {
   return (crashed_status_ == base::TERMINATION_STATUS_PROCESS_CRASHED ||
@@ -1180,6 +1190,7 @@ void WebContentsImpl::NotifyNavigationStateChanged(
           "466285 WebContentsImpl::NotifyNavigationStateChanged"));
   // Create and release the audio power save blocker depending on whether the
   // tab is actively producing audio or not.
+#ifndef DISABLE_MEDIA
   if ((changed_flags & INVALIDATE_TYPE_TAB) &&
       audio_state_provider_->IsAudioStateAvailable()) {
     if (WasRecentlyAudible()) {
@@ -1189,6 +1200,7 @@ void WebContentsImpl::NotifyNavigationStateChanged(
       audio_power_save_blocker_.reset();
     }
   }
+#endif
 
   if (delegate_)
     delegate_->NavigationStateChanged(this, changed_flags);
@@ -1222,9 +1234,11 @@ void WebContentsImpl::WasShown() {
   if (rvh)
     rvh->ResizeRectChanged(GetRootWindowResizerRect());
 
+#ifndef DISABLE_MEDIA
   // Restore power save blocker if there are active video players running.
   if (!active_video_players_.empty() && !video_power_save_blocker_)
     CreateVideoPowerSaveBlocker();
+#endif
 
   FOR_EACH_OBSERVER(WebContentsObserver, observers_, WasShown());
 
@@ -2014,6 +2028,7 @@ RenderWidgetHostView* WebContentsImpl::GetCreatedWidget(int route_id) {
   return widget_host_view;
 }
 
+#ifndef DISABLE_MEDIA
 void WebContentsImpl::RequestMediaAccessPermission(
     const MediaStreamRequest& request,
     const MediaResponseCallback& callback) {
@@ -2033,6 +2048,7 @@ bool WebContentsImpl::CheckMediaAccessPermission(const GURL& security_origin,
   return delegate_ &&
          delegate_->CheckMediaAccessPermission(this, security_origin, type);
 }
+#endif
 
 SessionStorageNamespace* WebContentsImpl::GetSessionStorageNamespace(
     SiteInstance* instance) {
@@ -2770,7 +2786,11 @@ void WebContentsImpl::InsertCSS(const std::string& css) {
 }
 
 bool WebContentsImpl::WasRecentlyAudible() {
+#ifndef DISABLE_MEDIA
   return audio_state_provider_->WasRecentlyAudible();
+#else
+  return false;
+#endif
 }
 
 void WebContentsImpl::GetManifest(const GetManifestCallback& callback) {
@@ -3377,7 +3397,9 @@ void WebContentsImpl::CreateAudioPowerSaveBlocker() {
 
 void WebContentsImpl::CreateVideoPowerSaveBlocker() {
   DCHECK(!video_power_save_blocker_);
+#ifndef DISABLE_MEDIA
   DCHECK(!active_video_players_.empty());
+#endif
   video_power_save_blocker_ = PowerSaveBlocker::Create(
       PowerSaveBlocker::kPowerSaveBlockPreventDisplaySleep,
       PowerSaveBlocker::kReasonVideoPlayback, "Playing video");
@@ -3387,6 +3409,7 @@ void WebContentsImpl::CreateVideoPowerSaveBlocker() {
 #endif
 }
 
+#ifndef DISABLE_MEDIA
 void WebContentsImpl::MaybeReleasePowerSaveBlockers() {
   // If there are no more audio players and we don't have audio stream
   // monitoring, release the audio power save blocker here instead of during
@@ -3461,6 +3484,7 @@ void WebContentsImpl::StopMediaSession() {
 }
 
 #endif  // defined(OS_ANDROID)
+#endif  // ifndef DISABLE_MEDIA
 
 void WebContentsImpl::OnFirstVisuallyNonEmptyPaint() {
   FOR_EACH_OBSERVER(WebContentsObserver, observers_,
@@ -4603,14 +4627,18 @@ void WebContentsImpl::CreateBrowserPluginEmbedderIfNecessary() {
 
 void WebContentsImpl::ClearPowerSaveBlockers(
     RenderFrameHost* render_frame_host) {
+#ifndef DISABLE_MEDIA
   RemoveAllMediaPlayerEntries(render_frame_host, &active_audio_players_);
   RemoveAllMediaPlayerEntries(render_frame_host, &active_video_players_);
   MaybeReleasePowerSaveBlockers();
+#endif
 }
 
 void WebContentsImpl::ClearAllPowerSaveBlockers() {
+#ifndef DISABLE_MEDIA
   active_audio_players_.clear();
   active_video_players_.clear();
+#endif
   audio_power_save_blocker_.reset();
   video_power_save_blocker_.reset();
 }
@@ -4637,6 +4665,7 @@ void WebContentsImpl::OnPreferredSizeChanged(const gfx::Size& old_size) {
     delegate_->UpdatePreferredSize(this, new_size);
 }
 
+#ifndef DISABLE_MEDIA
 void WebContentsImpl::AddMediaPlayerEntry(int64 player_cookie,
                                           ActiveMediaPlayerMap* player_map) {
   if (!HasValidFrameSource())
@@ -4681,6 +4710,7 @@ void WebContentsImpl::RemoveAllMediaPlayerEntries(
     return;
   player_map->erase(it);
 }
+#endif
 
 void WebContentsImpl::SetForceDisableOverscrollContent(bool force_disable) {
   force_disable_overscroll_content_ = force_disable;
