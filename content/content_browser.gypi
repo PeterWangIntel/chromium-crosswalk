@@ -2414,15 +2414,6 @@
         ['exclude', '^browser/speech/'],
       ],
     }],
-    ['enable_web_speech==0 and OS=="android"', {
-      'sources/': [
-        ['exclude', '^browser/speech/'],
-        ['include', '^browser/speech/speech_recognition_dispatcher_host\\.(cc|h)$'],
-        ['include', '^browser/speech/speech_recognition_manager_impl\\.(cc|h)$'],
-        ['include', '^browser/speech/speech_recognizer\\.h$'],
-        ['include', '^browser/speech/speech_recognizer_impl_android\\.(cc|h)$'],
-      ],
-    }],
     ['OS == "win"', {
       'sources!': [
         'browser/geolocation/empty_wifi_data_provider.cc',
